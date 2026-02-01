@@ -55,6 +55,67 @@
         </div>
     </div>
 
+    <!-- Cabang Asal & Tujuan -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Cabang Asal -->
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Cabang Asal
+            </h3>
+            <div class="space-y-2">
+                @if($shipment->originBranch)
+                    <div>
+                        <span class="text-sm text-gray-600">Nama:</span>
+                        <span class="ml-2 font-medium text-gray-900">{{ $shipment->originBranch->name }}</span>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Kode:</span>
+                        <span class="ml-2 font-medium text-gray-700">{{ $shipment->originBranch->code }}</span>
+                    </div>
+                @else
+                    <p class="text-sm text-gray-500">Cabang asal tidak tersedia</p>
+                @endif
+            </div>
+        </div>
+
+        <!-- Cabang Tujuan -->
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Cabang Tujuan
+            </h3>
+            <div class="space-y-2">
+                @if($shipment->destinationBranch)
+                    <div>
+                        <span class="text-sm text-gray-600">Nama:</span>
+                        <span class="ml-2 font-medium text-gray-900">{{ $shipment->destinationBranch->name }}</span>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-600">Kode:</span>
+                        <span class="ml-2 font-medium text-gray-700">{{ $shipment->destinationBranch->code }}</span>
+                    </div>
+                    @if($shipment->status === 'sampai_di_cabang_tujuan' && $shipment->isCOD() && $shipment->cod_status === 'belum_lunas')
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <p class="text-xs text-gray-600 mb-2">Paket sudah sampai di cabang tujuan</p>
+                            <a href="{{ route('admin.shipments.index') }}?direction=incoming&status=sampai_di_cabang_tujuan" 
+                               class="inline-block text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors">
+                                Lihat Paket Masuk
+                            </a>
+                        </div>
+                    @endif
+                @else
+                    <p class="text-sm text-gray-500">Cabang tujuan tidak tersedia</p>
+                @endif
+            </div>
+        </div>
+    </div>
+
     <!-- Pengirim & Penerima -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- Pengirim -->

@@ -50,7 +50,8 @@ class PasswordResetController extends Controller
         // Check if user has phone for WhatsApp reset
         if ($user->phone) {
             // Send reset code via WhatsApp using Fonnte
-            $resetCode = Str::random(6);
+            // Generate 6-digit numeric code only
+            $resetCode = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
             
             // Store reset code in session (or use cache with expiration)
             cache()->put('password_reset_code:' . $user->id, [
@@ -109,7 +110,7 @@ class PasswordResetController extends Controller
     {
         $request->validate([
             'email' => ['required', 'email'],
-            'code' => ['required', 'string', 'size:6'],
+            'code' => ['required', 'string', 'size:6', 'regex:/^[0-9]{6}$/'],
         ]);
 
         $user = User::where('email', $request->email)->first();

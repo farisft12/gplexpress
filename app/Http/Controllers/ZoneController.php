@@ -61,29 +61,16 @@ class ZoneController extends Controller
     /**
      * Store a newly created zone
      */
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StoreZoneRequest $request)
     {
-        $this->authorize('create', Zone::class);
-        
-        $validated = $request->validate([
-            'branch_id' => ['required', 'exists:branches,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'city' => ['nullable', 'string', 'max:255'],
-            'district' => ['nullable', 'string', 'max:255'],
-            'postal_code' => ['nullable', 'string', 'max:10'],
-            'status' => ['required', 'in:active,inactive'],
-        ]);
+        try {
+            Zone::create($request->validated());
 
-        // Verify branch access (unless super admin)
-        if (auth()->user()->role !== 'super_admin' && auth()->user()->branch_id != $validated['branch_id']) {
-            return back()->withErrors(['branch_id' => 'Anda tidak memiliki akses ke cabang ini.']);
+            return redirect()->route('admin.zones.index')
+                ->with('success', 'Zone berhasil dibuat.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
-
-        Zone::create($validated);
-
-        return redirect()->route('admin.zones.index')
-            ->with('success', 'Zone berhasil dibuat.');
     }
 
     /**
@@ -120,29 +107,16 @@ class ZoneController extends Controller
     /**
      * Update the specified zone
      */
-    public function update(Request $request, Zone $zone)
+    public function update(\App\Http\Requests\UpdateZoneRequest $request, Zone $zone)
     {
-        $this->authorize('update', $zone);
-        
-        $validated = $request->validate([
-            'branch_id' => ['required', 'exists:branches,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'city' => ['nullable', 'string', 'max:255'],
-            'district' => ['nullable', 'string', 'max:255'],
-            'postal_code' => ['nullable', 'string', 'max:10'],
-            'status' => ['required', 'in:active,inactive'],
-        ]);
+        try {
+            $zone->update($request->validated());
 
-        // Verify branch access (unless super admin)
-        if (auth()->user()->role !== 'super_admin' && auth()->user()->branch_id != $validated['branch_id']) {
-            return back()->withErrors(['branch_id' => 'Anda tidak memiliki akses ke cabang ini.']);
+            return redirect()->route('admin.zones.index')
+                ->with('success', 'Zone berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
-
-        $zone->update($validated);
-
-        return redirect()->route('admin.zones.index')
-            ->with('success', 'Zone berhasil diperbarui.');
     }
 
     /**

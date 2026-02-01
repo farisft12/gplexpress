@@ -8,11 +8,18 @@ use App\Models\Branch;
 use App\Models\CourierSettlement;
 use App\Models\User;
 use App\Models\Zone;
+use App\Services\Dashboard\OwnerDashboardService;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class OwnerController extends Controller
 {
+    protected OwnerDashboardService $dashboardService;
+
+    public function __construct(OwnerDashboardService $dashboardService)
+    {
+        $this->dashboardService = $dashboardService;
+    }
     /**
      * Owner Dashboard - All features access
      */
@@ -30,24 +37,7 @@ class OwnerController extends Controller
         $thisMonth = now()->startOfMonth();
 
         // Overview Metrics (all branches or filtered)
-        $metrics = [
-            'today' => [
-                'total_paket' => Shipment::when($branchId, fn($q) => $q->where('branch_id', $branchId))->whereDate('created_at', $today)->count(),
-                'cod_collected' => Shipment::when($branchId, fn($q) => $q->where('branch_id', $branchId))->whereDate('created_at', $today)->where('type', 'cod')->where('cod_status', 'lunas')->sum('cod_amount'),
-                'delivered' => Shipment::when($branchId, fn($q) => $q->where('branch_id', $branchId))->whereDate('delivered_at', $today)->where('status', 'diterima')->count(),
-            ],
-            'this_week' => [
-                'total_paket' => Shipment::when($branchId, fn($q) => $q->where('branch_id', $branchId))->where('created_at', '>=', $thisWeek)->count(),
-                'cod_collected' => Shipment::when($branchId, fn($q) => $q->where('branch_id', $branchId))->where('created_at', '>=', $thisWeek)->where('type', 'cod')->where('cod_status', 'lunas')->sum('cod_amount'),
-            ],
-            'this_month' => [
-                'total_paket' => Shipment::when($branchId, fn($q) => $q->where('branch_id', $branchId))->where('created_at', '>=', $thisMonth)->count(),
-                'cod_collected' => Shipment::when($branchId, fn($q) => $q->where('branch_id', $branchId))->where('created_at', '>=', $thisMonth)->where('type', 'cod')->where('cod_status', 'lunas')->sum('cod_amount'),
-            ],
-            'pending_settlements' => CourierSettlement::when($branchId, fn($q) => $q->where('branch_id', $branchId))->where('status', 'pending')->count(),
-            'total_branches' => Branch::where('status', 'active')->count(),
-            'total_couriers' => User::when($branchId, fn($q) => $q->where('branch_id', $branchId))->where('role', 'kurir')->where('status', 'active')->count(),
-        ];
+        $metrics = $this->dashboardService->getMetrics($branchId, $today, $thisWeek, $thisMonth);
 
         $branches = Branch::where('status', 'active')->get();
         $selectedBranch = $branchId ? Branch::find($branchId) : null;

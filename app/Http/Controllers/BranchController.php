@@ -59,24 +59,13 @@ class BranchController extends Controller
     /**
      * Store a newly created branch
      */
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StoreBranchRequest $request)
     {
-        $this->authorize('create', Branch::class);
-        
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'city' => ['required', 'string', 'max:255'],
-            'address' => ['required', 'string'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'manager_id' => ['nullable', 'exists:users,id'],
-            'status' => ['required', 'in:active,inactive'],
-        ]);
-
+        $validated = $request->validated();
         $validated['code'] = Branch::generateCode();
 
         DB::transaction(function () use ($validated) {
-        Branch::create($validated);
+            Branch::create($validated);
             // Clear cache
             cache()->forget('active_branches');
             cache()->forget('active_managers');
@@ -107,22 +96,10 @@ class BranchController extends Controller
     /**
      * Update the specified branch
      */
-    public function update(Request $request, Branch $branch)
+    public function update(\App\Http\Requests\UpdateBranchRequest $request, Branch $branch)
     {
-        $this->authorize('update', $branch);
-        
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'city' => ['required', 'string', 'max:255'],
-            'address' => ['required', 'string'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'manager_id' => ['nullable', 'exists:users,id'],
-            'status' => ['required', 'in:active,inactive'],
-        ]);
-
-        DB::transaction(function () use ($branch, $validated) {
-        $branch->update($validated);
+        DB::transaction(function () use ($branch, $request) {
+            $branch->update($request->validated());
             // Clear cache
             cache()->forget('active_branches');
             cache()->forget('active_managers');

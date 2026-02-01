@@ -30,9 +30,13 @@ class ProfileController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'phone' => ['nullable', 'string', 'regex:/^(\+62|62|0)[0-9]{9,13}$/'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             'current_password' => ['nullable', 'required_with:password'],
             'password' => ['nullable', 'confirmed', Password::defaults()],
+        ], [
+            'avatar.image' => 'File yang diupload harus berupa gambar.',
+            'avatar.mimes' => 'Format gambar harus JPG, PNG, GIF, atau WEBP.',
+            'avatar.max' => 'Ukuran gambar maksimal 2MB.',
         ]);
 
         // Update basic info

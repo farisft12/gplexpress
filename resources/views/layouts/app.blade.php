@@ -400,9 +400,10 @@
                             <p class="text-xs text-gray-500">{{ Auth::user()->email }}</p>
                         </div>
                         <div class="flex-shrink-0">
-                            <div class="w-10 h-10 bg-[#F4C430]/10 rounded-full flex items-center justify-center border-2 border-[#F4C430]/20">
-                                @if(Auth::user()->avatar)
-                                    <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}" class="w-full h-full rounded-full object-cover">
+                            <div class="w-10 h-10 bg-[#F4C430]/10 rounded-full flex items-center justify-center border-2 border-[#F4C430]/20 overflow-hidden">
+                                @if(Auth::user()->avatar_url)
+                                    <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="w-full h-full rounded-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <span class="text-[#F4C430] font-semibold text-sm" style="display: none;">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
                                 @else
                                     <span class="text-[#F4C430] font-semibold text-sm">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
                                 @endif

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Shipment;
 use App\Models\PaymentTransaction;
 use App\Jobs\ProcessPaymentCallback;
+use App\Services\Payment\PaymentService;
+use App\Services\Payment\QrisPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,8 +17,14 @@ use Illuminate\Support\Facades\Http;
 
 class PaymentController extends Controller
 {
-    public function __construct()
+    protected PaymentService $paymentService;
+    protected QrisPaymentService $qrisPaymentService;
+
+    public function __construct(PaymentService $paymentService, QrisPaymentService $qrisPaymentService)
     {
+        $this->paymentService = $paymentService;
+        $this->qrisPaymentService = $qrisPaymentService;
+
         // Configure Midtrans from config/services.php (which reads from .env)
         $serverKey = config('services.midtrans.server_key');
         
@@ -111,37 +119,14 @@ class PaymentController extends Controller
      */
     public function processCashPayment(Request $request, Shipment $shipment)
     {
-        if ($shipment->type !== 'cod' || $shipment->status !== 'sampai_di_cabang_tujuan') {
-            return back()->withErrors(['error' => 'Pembayaran tidak dapat diproses.']);
+        try {
+            $this->paymentService->processCashPayment($shipment);
+
+            return redirect()->route('admin.shipments.index')
+                ->with('success', 'Pembayaran Cash berhasil diproses. Status paket diubah menjadi Diterima.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
-
-        if ($shipment->cod_status === 'lunas') {
-            return back()->withErrors(['error' => 'Paket ini sudah lunas.']);
-        }
-
-        DB::transaction(function () use ($shipment) {
-            $shipment->update([
-                'payment_method' => 'cash',
-                'cod_status' => 'lunas',
-                'payment_status' => 'settlement',
-            ]);
-
-            // Create status history
-            $shipment->statusHistories()->create([
-                'status' => 'diterima',
-                'updated_by' => auth()->id(),
-                'notes' => 'Pembayaran COD dengan Cash - Lunas',
-            ]);
-
-            // Update status to diterima
-            $shipment->update([
-                'status' => 'diterima',
-                'delivered_at' => now(),
-            ]);
-        });
-
-        return redirect()->route('admin.shipments.index')
-            ->with('success', 'Pembayaran Cash berhasil diproses. Status paket diubah menjadi Diterima.');
     }
 
     /**

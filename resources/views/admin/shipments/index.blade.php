@@ -12,9 +12,40 @@
         </a>
     </div>
 
+    <!-- Direction Tabs -->
+    @php
+        $currentDirection = request('direction', 'all');
+        $user = auth()->user();
+        // Only show tabs and counts for admin/manager with branch_id
+        $showDirectionTabs = $user->branch_id && !$user->isOwner();
+        if ($showDirectionTabs) {
+            $outgoingCount = \App\Models\Shipment::where('origin_branch_id', $user->branch_id)->count();
+            $incomingCount = \App\Models\Shipment::where('destination_branch_id', $user->branch_id)->count();
+        }
+    @endphp
+    @if($showDirectionTabs)
+    <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+        <div class="flex gap-2 border-b border-gray-200">
+            <a href="{{ route('admin.shipments.index', array_merge(request()->except('direction'), ['direction' => 'all'])) }}" 
+               class="px-4 py-2 text-sm font-medium {{ $currentDirection === 'all' || !$currentDirection ? 'text-[#F4C430] border-b-2 border-[#F4C430]' : 'text-gray-600 hover:text-gray-900' }}">
+                Semua Paket
+            </a>
+            <a href="{{ route('admin.shipments.index', array_merge(request()->except('direction'), ['direction' => 'outgoing'])) }}" 
+               class="px-4 py-2 text-sm font-medium {{ $currentDirection === 'outgoing' ? 'text-[#F4C430] border-b-2 border-[#F4C430]' : 'text-gray-600 hover:text-gray-900' }}">
+                Paket Keluar <span class="ml-1 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">{{ $outgoingCount }}</span>
+            </a>
+            <a href="{{ route('admin.shipments.index', array_merge(request()->except('direction'), ['direction' => 'incoming'])) }}" 
+               class="px-4 py-2 text-sm font-medium {{ $currentDirection === 'incoming' ? 'text-[#F4C430] border-b-2 border-[#F4C430]' : 'text-gray-600 hover:text-gray-900' }}">
+                Paket Masuk <span class="ml-1 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">{{ $incomingCount }}</span>
+            </a>
+        </div>
+    </div>
+    @endif
+
     <!-- Filters -->
     <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-        <form method="GET" action="{{ route('admin.shipments.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form method="GET" action="{{ route('admin.shipments.index') }}" class="grid grid-cols-1 md:grid-cols-{{ $showDirectionTabs ? '5' : '4' }} gap-4">
+            <input type="hidden" name="direction" value="{{ request('direction') }}">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Resi</label>
                 <input type="text" name="resi" value="{{ request('resi') }}" placeholder="Cari nomor resi..." 
@@ -39,6 +70,16 @@
                     <option value="non_cod" {{ request('type') === 'non_cod' ? 'selected' : '' }}>Non-COD</option>
                 </select>
             </div>
+            @if($showDirectionTabs)
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Arah</label>
+                <select name="direction" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F4C430] focus:border-transparent outline-none">
+                    <option value="all" {{ request('direction') === 'all' || !request('direction') ? 'selected' : '' }}>Semua</option>
+                    <option value="outgoing" {{ request('direction') === 'outgoing' ? 'selected' : '' }}>Paket Keluar</option>
+                    <option value="incoming" {{ request('direction') === 'incoming' ? 'selected' : '' }}>Paket Masuk</option>
+                </select>
+            </div>
+            @endif
             <div class="flex items-end">
                 <button type="submit" class="w-full bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 transition-colors">
                     Filter
@@ -47,13 +88,139 @@
         </form>
     </div>
 
-    <!-- Shipments Table -->
-    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+    <!-- Shipments Cards (Mobile) -->
+    <div class="block md:hidden space-y-4 mb-6">
+        @forelse($shipments as $shipment)
+            @php
+                $isOutgoing = $shipment->origin_branch_id == auth()->user()->branch_id;
+                $isIncoming = $shipment->destination_branch_id == auth()->user()->branch_id;
+                $statusColors = [
+                    'pickup' => 'bg-yellow-100 text-yellow-800',
+                    'diproses' => 'bg-blue-100 text-blue-800',
+                    'dalam_pengiriman' => 'bg-purple-100 text-purple-800',
+                    'sampai_di_cabang_tujuan' => 'bg-orange-100 text-orange-800',
+                    'diterima' => 'bg-green-100 text-green-800',
+                ];
+            @endphp
+            <div class="bg-white rounded-xl shadow-md p-4 {{ $isIncoming && $shipment->status === 'sampai_di_cabang_tujuan' ? 'border-l-4 border-green-500' : '' }}">
+                <!-- Header -->
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h3 class="text-base font-bold text-gray-900">{{ $shipment->resi_number }}</h3>
+                            @if($isOutgoing)
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-medium">Keluar</span>
+                            @elseif($isIncoming)
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-medium">Masuk</span>
+                            @endif
+                        </div>
+                        <p class="text-xs text-gray-500">{{ $shipment->created_at->format('d/m/Y H:i') }}</p>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusColors[$shipment->status] ?? 'bg-gray-100 text-gray-800' }}">
+                        {{ ucfirst(str_replace('_', ' ', $shipment->status)) }}
+                    </span>
+                </div>
+
+                <!-- Cabang Info -->
+                <div class="mb-3 p-2 bg-gray-50 rounded-lg">
+                    <div class="text-xs text-gray-600 mb-1">
+                        <span class="font-medium">Asal:</span> {{ $shipment->originBranch->name ?? '-' }}
+                    </div>
+                    <div class="text-xs text-gray-600">
+                        <span class="font-medium">Tujuan:</span> 
+                        <span class="{{ $isIncoming ? 'font-semibold text-green-700' : '' }}">{{ $shipment->destinationBranch->name ?? '-' }}</span>
+                    </div>
+                </div>
+
+                <!-- Pengirim & Penerima -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">Pengirim</p>
+                        <p class="text-sm font-medium text-gray-900">{{ $shipment->sender_name }}</p>
+                        <p class="text-xs text-gray-500">{{ $shipment->sender_phone }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">Penerima</p>
+                        <p class="text-sm font-medium text-gray-900">{{ $shipment->receiver_name }}</p>
+                        <p class="text-xs text-gray-500">{{ $shipment->receiver_phone }}</p>
+                    </div>
+                </div>
+
+                <!-- Tipe & Kurir -->
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-200">
+                    <div>
+                        @if($shipment->type === 'cod')
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-[#F4C430]/10 text-[#F4C430]">
+                                COD
+                            </span>
+                            <p class="text-xs text-gray-600 mt-1">Rp {{ number_format($shipment->cod_amount, 0, ',', '.') }}</p>
+                        @else
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700">
+                                Non-COD
+                            </span>
+                            @if($shipment->shipping_cost)
+                                <p class="text-xs text-gray-600 mt-1">Rp {{ number_format($shipment->shipping_cost, 0, ',', '.') }}</p>
+                            @endif
+                        @endif
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-500 mb-1">Kurir</p>
+                        <p class="text-sm text-gray-900">{{ $shipment->courier ? $shipment->courier->name : '-' }}</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('admin.shipments.show', $shipment) }}" 
+                       class="flex-1 min-w-[80px] px-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium text-center hover:bg-blue-100 transition-colors">
+                        Detail
+                    </a>
+                    <a href="{{ route('tracking.index') }}?resi_number={{ $shipment->resi_number }}" 
+                       target="_blank"
+                       class="flex-1 min-w-[80px] px-3 py-2 bg-green-50 text-green-600 rounded-lg text-xs font-medium text-center hover:bg-green-100 transition-colors">
+                        Lacak
+                    </a>
+                    <a href="{{ route('admin.shipments.print', $shipment) }}" 
+                       target="_blank"
+                       class="flex-1 min-w-[80px] px-3 py-2 bg-gray-50 text-gray-600 rounded-lg text-xs font-medium text-center hover:bg-gray-100 transition-colors">
+                        Print
+                    </a>
+                    @if($shipment->status === 'pickup')
+                        <a href="{{ route('admin.shipments.edit', $shipment) }}" 
+                           class="flex-1 min-w-[80px] px-3 py-2 bg-[#F4C430]/10 text-[#F4C430] rounded-lg text-xs font-medium text-center hover:bg-[#F4C430]/20 transition-colors">
+                            Edit
+                        </a>
+                    @endif
+                    @if($shipment->type === 'cod' && $shipment->status === 'sampai_di_cabang_tujuan' && $shipment->cod_status === 'belum_lunas')
+                        <button onclick="openPaymentModal({{ $shipment->id }}, '{{ $shipment->resi_number }}', {{ $shipment->cod_amount }})" 
+                                class="flex-1 min-w-[80px] px-3 py-2 bg-green-600 text-white rounded-lg text-xs font-medium text-center hover:bg-green-700 transition-colors">
+                            Bayar
+                        </button>
+                    @endif
+                </div>
+            </div>
+        @empty
+            <div class="bg-white rounded-xl shadow-md p-12 text-center">
+                <p class="text-gray-500">Tidak ada data paket</p>
+            </div>
+        @endforelse
+
+        <!-- Pagination Mobile -->
+        @if($shipments->hasPages())
+            <div class="bg-white rounded-xl shadow-md p-4">
+                {{ $shipments->links() }}
+            </div>
+        @endif
+    </div>
+
+    <!-- Shipments Table (Desktop) -->
+    <div class="hidden md:block bg-white rounded-xl shadow-md overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paket</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cabang</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pengirim</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penerima</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe</th>
@@ -64,10 +231,47 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($shipments as $shipment)
-                        <tr class="hover:bg-gray-50">
+                        @php
+                            $isOutgoing = $shipment->origin_branch_id == auth()->user()->branch_id;
+                            $isIncoming = $shipment->destination_branch_id == auth()->user()->branch_id;
+                        @endphp
+                        <tr class="hover:bg-gray-50 {{ $isIncoming && $shipment->status === 'sampai_di_cabang_tujuan' ? 'bg-green-50' : '' }}">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-gray-900">{{ $shipment->resi_number }}</div>
                                 <div class="text-xs text-gray-500">{{ $shipment->created_at->format('d/m/Y H:i') }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="space-y-1">
+                                    @if($isOutgoing)
+                                        <div class="flex items-center gap-1">
+                                            <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-medium">Keluar</span>
+                                        </div>
+                                        <div class="text-xs text-gray-600">
+                                            <span class="font-medium">Asal:</span> {{ $shipment->originBranch->name ?? '-' }}
+                                        </div>
+                                        <div class="text-xs text-gray-600">
+                                            <span class="font-medium">Tujuan:</span> {{ $shipment->destinationBranch->name ?? '-' }}
+                                        </div>
+                                    @elseif($isIncoming)
+                                        <div class="flex items-center gap-1">
+                                            <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-medium">Masuk</span>
+                                        </div>
+                                        <div class="text-xs text-gray-600">
+                                            <span class="font-medium">Asal:</span> {{ $shipment->originBranch->name ?? '-' }}
+                                        </div>
+                                        <div class="text-xs text-gray-600">
+                                            <span class="font-medium">Tujuan:</span> 
+                                            <span class="font-semibold text-green-700">{{ $shipment->destinationBranch->name ?? '-' }}</span>
+                                        </div>
+                                    @else
+                                        <div class="text-xs text-gray-600">
+                                            <span class="font-medium">Asal:</span> {{ $shipment->originBranch->name ?? '-' }}
+                                        </div>
+                                        <div class="text-xs text-gray-600">
+                                            <span class="font-medium">Tujuan:</span> {{ $shipment->destinationBranch->name ?? '-' }}
+                                        </div>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $shipment->sender_name }}</div>
@@ -181,7 +385,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
                                 Tidak ada data paket
                             </td>
                         </tr>
@@ -190,7 +394,7 @@
             </table>
         </div>
 
-        <!-- Pagination -->
+        <!-- Pagination Desktop -->
         @if($shipments->hasPages())
             <div class="px-6 py-4 border-t border-gray-200">
                 {{ $shipments->links() }}

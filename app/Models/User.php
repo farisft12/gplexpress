@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -136,5 +137,33 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Zone::class, 'courier_zones', 'courier_id', 'zone_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Get avatar URL
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+
+        if (Storage::disk('public')->exists($this->avatar)) {
+            return Storage::url($this->avatar);
+        }
+
+        return null;
+    }
+
+    /**
+     * Get avatar URL with fallback
+     */
+    public function getAvatarUrlWithFallbackAttribute(): string
+    {
+        if ($this->avatar_url) {
+            return $this->avatar_url;
+        }
+
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=F4C430&color=fff&size=128';
     }
 }

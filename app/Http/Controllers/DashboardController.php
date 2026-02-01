@@ -4,9 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\Dashboard\AdminDashboardService;
 
 class DashboardController extends Controller
 {
+    protected AdminDashboardService $adminDashboardService;
+
+    public function __construct(AdminDashboardService $adminDashboardService)
+    {
+        $this->adminDashboardService = $adminDashboardService;
+    }
     /**
      * Show dashboard based on user role (5 roles: owner, manager, admin, kurir, user)
      */
@@ -51,27 +58,7 @@ class DashboardController extends Controller
      */
     private function adminDashboard()
     {
-        $user = Auth::user();
-        $today = today();
-        
-        // Build base query with branch scope
-        $query = \App\Models\Shipment::query();
-        
-        // Branch scope untuk admin
-        if ($user->isAdmin() && $user->branch_id) {
-            $query->where('branch_id', $user->branch_id);
-        }
-        
-        $data = [
-            'total_paket_hari_ini' => (clone $query)->whereDate('created_at', $today)->count(),
-            'total_cod_hari_ini' => (clone $query)->whereDate('created_at', $today)
-                ->where('type', 'cod')
-                ->sum('cod_amount'),
-            'paket_dalam_pengantaran' => (clone $query)->whereIn('status', ['diproses', 'dalam_pengiriman'])->count(),
-            'paket_gagal' => (clone $query)->where('status', 'gagal')
-                ->whereDate('created_at', $today)
-                ->count(),
-        ];
+        $data = $this->adminDashboardService->getMetrics(Auth::user());
         
         return view('dashboard.admin', $data);
     }

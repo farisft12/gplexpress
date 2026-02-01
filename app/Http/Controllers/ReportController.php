@@ -4,84 +4,39 @@ namespace App\Http\Controllers;
 
 use App\Models\Shipment;
 use App\Models\User;
+use App\Services\Report\CodReportService;
+use App\Services\Report\NonCodReportService;
+use App\Services\Report\CourierBalanceReportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    protected CodReportService $codReportService;
+    protected NonCodReportService $nonCodReportService;
+    protected CourierBalanceReportService $courierBalanceReportService;
+
+    public function __construct(
+        CodReportService $codReportService,
+        NonCodReportService $nonCodReportService,
+        CourierBalanceReportService $courierBalanceReportService
+    ) {
+        $this->codReportService = $codReportService;
+        $this->nonCodReportService = $nonCodReportService;
+        $this->courierBalanceReportService = $courierBalanceReportService;
+    }
     /**
      * COD Report
      */
     public function codReport(Request $request)
     {
         $user = auth()->user();
+        $filters = $request->only(['date_from', 'date_to', 'courier_id', 'group_by']);
         
-        $query = Shipment::where('type', 'cod')
-            ->select([
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as jumlah_paket'),
-                DB::raw('SUM(cod_amount) as total_nilai_cod'),
-                DB::raw('SUM(CASE WHEN cod_status = \'lunas\' THEN 1 ELSE 0 END) as cod_lunas'),
-                DB::raw('SUM(CASE WHEN cod_status = \'belum_lunas\' THEN 1 ELSE 0 END) as cod_belum_lunas'),
-                DB::raw('SUM(CASE WHEN cod_status = \'lunas\' THEN cod_amount ELSE 0 END) as nilai_lunas'),
-                DB::raw('SUM(CASE WHEN cod_status = \'belum_lunas\' THEN cod_amount ELSE 0 END) as nilai_belum_lunas'),
-            ])
-            ->groupBy(DB::raw('DATE(created_at)'));
-
-        // Branch scope: Super Admin/Owner sees all, others see only their branch
-        if (!$user->canAccessAllBranches() && $user->branch_id) {
-            $query->where('branch_id', $user->branch_id);
-        }
-
-        // Filters
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        if ($request->filled('courier_id')) {
-            $query->where('courier_id', $request->courier_id);
-        }
-
-        // Grouping
-        $groupBy = $request->get('group_by', 'day');
-        if ($groupBy === 'week') {
-            // PostgreSQL uses EXTRACT for week
-            $query->selectRaw('EXTRACT(YEAR FROM created_at)::integer as year, EXTRACT(WEEK FROM created_at)::integer as week')
-                ->groupBy(DB::raw('EXTRACT(YEAR FROM created_at), EXTRACT(WEEK FROM created_at)'));
-        } elseif ($groupBy === 'month') {
-            $query->selectRaw('EXTRACT(YEAR FROM created_at)::integer as year, EXTRACT(MONTH FROM created_at)::integer as month')
-                ->groupBy(DB::raw('EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at)'));
-        }
-
+        $query = $this->codReportService->buildQuery($user, $filters);
         $reports = $query->orderBy('date', 'desc')->paginate(30);
-
-        // Calculate totals
-        $totals = Shipment::where('type', 'cod')
-            ->when(!$user->canAccessAllBranches() && $user->branch_id, function ($q) use ($user) {
-                $q->where('branch_id', $user->branch_id);
-            })
-            ->when($request->filled('date_from'), function ($q) use ($request) {
-                $q->whereDate('created_at', '>=', $request->date_from);
-            })
-            ->when($request->filled('date_to'), function ($q) use ($request) {
-                $q->whereDate('created_at', '<=', $request->date_to);
-            })
-            ->when($request->filled('courier_id'), function ($q) use ($request) {
-                $q->where('courier_id', $request->courier_id);
-            })
-            ->selectRaw('
-                COUNT(*) as total_paket,
-                SUM(cod_amount) as total_nilai_cod,
-                SUM(CASE WHEN cod_status = \'lunas\' THEN 1 ELSE 0 END) as total_lunas,
-                SUM(CASE WHEN cod_status = \'belum_lunas\' THEN 1 ELSE 0 END) as total_belum_lunas,
-                SUM(CASE WHEN cod_status = \'lunas\' THEN cod_amount ELSE 0 END) as total_nilai_lunas,
-                SUM(CASE WHEN cod_status = \'belum_lunas\' THEN cod_amount ELSE 0 END) as total_nilai_belum_lunas
-            ')
-            ->first();
+        
+        $totals = $this->codReportService->getTotals($user, $filters);
 
         // Cache couriers list as it doesn't change frequently
         $couriers = cache()->remember('active_couriers', 3600, function () use ($user) {
@@ -97,6 +52,7 @@ class ReportController extends Controller
             return $query->orderBy('name')->get();
         });
 
+        $groupBy = $filters['group_by'] ?? 'day';
         return view('admin.reports.cod', compact('reports', 'couriers', 'totals', 'groupBy'));
     }
 
@@ -106,65 +62,12 @@ class ReportController extends Controller
     public function nonCodReport(Request $request)
     {
         $user = auth()->user();
+        $filters = $request->only(['date_from', 'date_to', 'courier_id', 'group_by']);
         
-        $query = Shipment::where('type', 'non_cod')
-            ->select([
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as jumlah_paket'),
-                DB::raw('SUM(COALESCE(shipping_cost, 0)) as total_tarif'),
-            ])
-            ->groupBy(DB::raw('DATE(created_at)'));
-
-        // Branch scope: Super Admin/Owner sees all, others see only their branch
-        if (!$user->canAccessAllBranches() && $user->branch_id) {
-            $query->where('branch_id', $user->branch_id);
-        }
-
-        // Filters
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        if ($request->filled('courier_id')) {
-            $query->where('courier_id', $request->courier_id);
-        }
-
-        // Grouping
-        $groupBy = $request->get('group_by', 'day');
-        if ($groupBy === 'week') {
-            // PostgreSQL uses EXTRACT for week
-            $query->selectRaw('EXTRACT(YEAR FROM created_at)::integer as year, EXTRACT(WEEK FROM created_at)::integer as week')
-                ->groupBy(DB::raw('EXTRACT(YEAR FROM created_at), EXTRACT(WEEK FROM created_at)'));
-        } elseif ($groupBy === 'month') {
-            $query->selectRaw('EXTRACT(YEAR FROM created_at)::integer as year, EXTRACT(MONTH FROM created_at)::integer as month')
-                ->groupBy(DB::raw('EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at)'));
-        }
-
+        $query = $this->nonCodReportService->buildQuery($user, $filters);
         $reports = $query->orderBy('date', 'desc')->paginate(30);
-
-        // Calculate totals
-        $totals = Shipment::where('type', 'non_cod')
-            ->when(!$user->canAccessAllBranches() && $user->branch_id, function ($q) use ($user) {
-                $q->where('branch_id', $user->branch_id);
-            })
-            ->when($request->filled('date_from'), function ($q) use ($request) {
-                $q->whereDate('created_at', '>=', $request->date_from);
-            })
-            ->when($request->filled('date_to'), function ($q) use ($request) {
-                $q->whereDate('created_at', '<=', $request->date_to);
-            })
-            ->when($request->filled('courier_id'), function ($q) use ($request) {
-                $q->where('courier_id', $request->courier_id);
-            })
-            ->selectRaw('
-                COUNT(*) as total_paket,
-                SUM(COALESCE(shipping_cost, 0)) as total_tarif
-            ')
-            ->first();
+        
+        $totals = $this->nonCodReportService->getTotals($user, $filters);
 
         // Cache couriers list as it doesn't change frequently
         $couriers = cache()->remember('active_couriers', 3600, function () use ($user) {
@@ -180,6 +83,7 @@ class ReportController extends Controller
             return $query->orderBy('name')->get();
         });
 
+        $groupBy = $filters['group_by'] ?? 'day';
         return view('admin.reports.non-cod', compact('reports', 'couriers', 'totals', 'groupBy'));
     }
 
@@ -189,14 +93,9 @@ class ReportController extends Controller
     public function codDetail(Request $request)
     {
         $user = auth()->user();
+        $filters = $request->only(['date_from', 'date_to', 'courier_id', 'cod_status', 'date', 'year', 'week', 'month', 'group_by']);
         
-        $query = Shipment::where('type', 'cod')
-            ->with(['courier', 'originBranch', 'destinationBranch']);
-
-        // Branch scope: Super Admin/Owner sees all, others see only their branch
-        if (!$user->canAccessAllBranches() && $user->branch_id) {
-            $query->where('branch_id', $user->branch_id);
-        }
+        $query = $this->codReportService->getDetailQuery($user, $filters);
 
         // Build date filter based on group_by
         $groupBy = $request->get('group_by', 'day');
@@ -288,39 +187,24 @@ class ReportController extends Controller
 
     /**
      * Courier Balance Report
-     * Optimized: Use database join instead of get()->map()->filter()
      */
     public function courierBalance(Request $request)
     {
         $user = auth()->user();
+        $filters = $request->only(['date_from', 'date_to', 'courier_id']);
         
-        // Use join to get couriers with balances in a single query
-        // This is more efficient than get()->map()->filter()
-        $query = User::whereIn('users.role', ['kurir', 'courier_cabang'])
-            ->where('users.status', 'active')
-            ->leftJoin('courier_current_balances', 'users.id', '=', 'courier_current_balances.courier_id')
-            ->select(
-                'users.id',
-                'users.name',
-                'users.email',
-                'users.branch_id',
-                DB::raw('COALESCE(courier_current_balances.current_balance, 0) as balance')
-            )
-            ->having('balance', '>', 0) // Only show couriers with balance > 0
-            ->orderBy('balance', 'desc');
-        
-        // Branch scope: Super Admin/Owner sees all, others see only their branch
-        if (!$user->canAccessAllBranches() && $user->branch_id) {
-            $query->where('users.branch_id', $user->branch_id);
-        }
-        
-        $couriers = $query->get()
-            ->map(function ($courier) {
+        $query = $this->courierBalanceReportService->buildQuery($user, $filters);
+        $couriers = $query->orderBy('total_cod_collected', 'desc')->get()
+            ->map(function ($item) {
+                $balance = $this->courierBalanceReportService->getCourierBalance($item->courier_id);
                 return [
-                    'id' => $courier->id,
-                    'name' => $courier->name,
-                    'email' => $courier->email,
-                    'balance' => (float) $courier->balance,
+                    'id' => $item->courier_id,
+                    'name' => $item->courier->name,
+                    'email' => $item->courier->email,
+                    'balance' => $balance,
+                    'total_cod_collected' => $item->total_cod_collected,
+                    'total_settlement' => $item->total_settlement,
+                    'jumlah_paket_cod' => $item->jumlah_paket_cod,
                 ];
             })
             ->values();

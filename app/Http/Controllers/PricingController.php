@@ -69,22 +69,10 @@ class PricingController extends Controller
     /**
      * Store a newly created pricing
      */
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StorePricingRequest $request)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'origin_branch_id' => ['required', 'exists:branches,id'],
-            'destination_branch_id' => ['required', 'exists:branches,id', 'different:origin_branch_id'],
-            'base_price' => ['required', 'numeric', 'min:0'],
-            'cod_fee_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'cod_fee_fixed' => ['nullable', 'numeric', 'min:0'],
-            'service_type' => ['required', 'in:reguler,express,same_day'],
-            'estimated_days' => ['required', 'integer', 'min:1'],
-            'status' => ['required', 'in:active,inactive'],
-        ]);
-
-        DB::transaction(function () use ($validated) {
-            PricingTable::create($validated);
+        DB::transaction(function () use ($request) {
+            PricingTable::create($request->validated());
             // Clear cache if needed
             cache()->forget('active_branches');
         });
@@ -111,22 +99,10 @@ class PricingController extends Controller
     /**
      * Update the specified pricing
      */
-    public function update(Request $request, PricingTable $pricing)
+    public function update(\App\Http\Requests\UpdatePricingRequest $request, PricingTable $pricing)
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'origin_branch_id' => ['required', 'exists:branches,id'],
-            'destination_branch_id' => ['required', 'exists:branches,id', 'different:origin_branch_id'],
-            'base_price' => ['required', 'numeric', 'min:0'],
-            'cod_fee_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'cod_fee_fixed' => ['nullable', 'numeric', 'min:0'],
-            'service_type' => ['required', 'in:reguler,express,same_day'],
-            'estimated_days' => ['required', 'integer', 'min:1'],
-            'status' => ['required', 'in:active,inactive'],
-        ]);
-
-        DB::transaction(function () use ($pricing, $validated) {
-            $pricing->update($validated);
+        DB::transaction(function () use ($pricing, $request) {
+            $pricing->update($request->validated());
             // Clear cache if needed
             cache()->forget('active_branches');
         });
