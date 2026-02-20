@@ -34,6 +34,7 @@
                 <span class="px-3 py-1 text-sm font-semibold rounded-full {{ $statusColors[$shipment->status] ?? 'bg-gray-100 text-gray-800' }}">
                     {{ ucfirst(str_replace('_', ' ', $shipment->status)) }}
                 </span>
+<<<<<<< HEAD
                 @if($shipment->type === 'cod')
                     <p class="text-sm text-gray-600 mt-2">
                         Status COD: 
@@ -42,12 +43,15 @@
                         </span>
                     </p>
                 @endif
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             </div>
             <div class="text-right">
                 <p class="text-sm text-gray-600 mb-1">Kurir</p>
                 <p class="text-sm font-medium text-gray-900">{{ $shipment->courier ? $shipment->courier->name : '-' }}</p>
             </div>
         </div>
+<<<<<<< HEAD
         @if($shipment->type === 'cod' && $shipment->cod_status !== 'lunas' && $shipment->status === 'sampai_di_cabang_tujuan')
             <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p class="text-sm text-yellow-800">
@@ -56,11 +60,17 @@
                 </p>
             </div>
         @endif
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     </div>
 
     <!-- Edit Status Form -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+<<<<<<< HEAD
         <form method="POST" action="{{ route('admin.shipments.update-status', $shipment->id) }}" class="space-y-6">
+=======
+        <form method="POST" action="{{ route('admin.shipments.update-status', $shipment) }}" class="space-y-6">
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             @csrf
 
             <div>
@@ -93,11 +103,15 @@
                         <option value="sampai_di_cabang_tujuan" {{ old('status', $shipment->status) === 'sampai_di_cabang_tujuan' ? 'selected' : '' }}>Sampai di Cabang Tujuan</option>
                     @endif
                     @if(in_array('diterima', $nextStatuses) || $shipment->status === 'diterima')
+<<<<<<< HEAD
                         @if($shipment->type === 'cod' && $shipment->cod_status !== 'lunas' && $shipment->status !== 'diterima')
                             <option value="diterima" disabled>Diterima (COD harus lunas terlebih dahulu)</option>
                         @else
                             <option value="diterima" {{ old('status', $shipment->status) === 'diterima' ? 'selected' : '' }}>Diterima</option>
                         @endif
+=======
+                        <option value="diterima" {{ old('status', $shipment->status) === 'diterima' ? 'selected' : '' }}>Diterima</option>
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                     @endif
                 </select>
                 @error('status')
@@ -112,9 +126,12 @@
                         Status dapat diubah ke: <strong>Sampai di Cabang Tujuan</strong>
                     @elseif($shipment->status === 'sampai_di_cabang_tujuan')
                         Status dapat diubah ke: <strong>Diterima</strong>
+<<<<<<< HEAD
                         @if($shipment->type === 'cod' && $shipment->cod_status !== 'lunas')
                             <span class="text-red-600 font-semibold">⚠ Paket COD harus lunas terlebih dahulu!</span>
                         @endif
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                     @else
                         Status ini tidak dapat diubah lagi.
                     @endif
@@ -201,21 +218,29 @@
         const statusSelect = document.getElementById('status');
         const paymentMethodField = document.getElementById('paymentMethodField');
         const paymentMethodSelect = document.getElementById('payment_method');
+<<<<<<< HEAD
         const form = document.querySelector('form');
         const codStatus = '{{ $shipment->cod_status }}';
         
         if (statusSelect && paymentMethodField && paymentMethodSelect && form) {
+=======
+        
+        if (statusSelect && paymentMethodField && paymentMethodSelect) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             statusSelect.addEventListener('change', function() {
                 // Show payment method field only if status is being changed to diterima
                 const selectedStatus = this.value;
                 
                 if (selectedStatus === 'diterima') {
+<<<<<<< HEAD
                     // Check if COD is already paid
                     if (codStatus !== 'lunas') {
                         alert('Paket COD harus lunas terlebih dahulu sebelum status dapat diubah menjadi diterima. Silakan lakukan pembayaran COD terlebih dahulu.');
                         this.value = '{{ $shipment->status }}'; // Reset to current status
                         return;
                     }
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                     paymentMethodField.style.display = 'block';
                     paymentMethodSelect.setAttribute('required', 'required');
                 } else {
@@ -224,6 +249,7 @@
                 }
             });
             
+<<<<<<< HEAD
             // Prevent form submission if COD is not paid and status is diterima
             form.addEventListener('submit', function(e) {
                 if (statusSelect.value === 'diterima' && codStatus !== 'lunas') {
@@ -233,6 +259,8 @@
                 }
             });
             
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             // Initial check - show if current status is diterima
             if (statusSelect.value === 'diterima') {
                 paymentMethodField.style.display = 'block';

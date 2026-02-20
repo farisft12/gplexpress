@@ -16,8 +16,13 @@ class UserPolicy
             return true;
         }
         
+<<<<<<< HEAD
         // Manager and Admin can view users in their branch
         if (($user->isManager() || $user->isAdmin()) && $user->branch_id) {
+=======
+        // Manager can view users in their branch (for viewing admin and kurir)
+        if ($user->isManager() && $user->branch_id) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             return true;
         }
         
@@ -34,8 +39,13 @@ class UserPolicy
             return true;
         }
         
+<<<<<<< HEAD
         // Manager and Admin can view users in their branch
         if (($user->isManager() || $user->isAdmin()) && $user->branch_id && $model->branch_id === $user->branch_id) {
+=======
+        // Manager can view users in their branch
+        if ($user->isManager() && $user->branch_id && $model->branch_id === $user->branch_id) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             return true;
         }
         

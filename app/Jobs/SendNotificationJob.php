@@ -26,6 +26,7 @@ class SendNotificationJob implements ShouldQueue
     public function handle(TemplateService $templateService): void
     {
         $log = $this->notificationLog;
+<<<<<<< HEAD
         
         // Refresh log to ensure we have the latest data
         $log->refresh();
@@ -52,13 +53,21 @@ class SendNotificationJob implements ShouldQueue
                 'log_id' => $log->id,
                 'shipment_id' => $log->shipment_id,
             ]);
+=======
+        $shipment = $log->shipment;
+
+        if (!$shipment) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             $log->markAsFailed('Shipment not found');
             return;
         }
 
+<<<<<<< HEAD
         // Load necessary relationships for template rendering
         $shipment->load(['destinationBranch', 'expedition', 'courier']);
 
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         try {
             // Render template
             $message = $templateService->render(

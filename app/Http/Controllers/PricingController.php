@@ -56,8 +56,11 @@ class PricingController extends Controller
      */
     public function create()
     {
+<<<<<<< HEAD
         $this->authorize('create', PricingTable::class);
         
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         // Cache branches list as it doesn't change frequently
         $branches = cache()->remember('active_branches', 3600, function () {
             return Branch::where('status', 'active')
@@ -88,8 +91,11 @@ class PricingController extends Controller
      */
     public function edit(PricingTable $pricing)
     {
+<<<<<<< HEAD
         $this->authorize('update', $pricing);
         
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         // Cache branches list as it doesn't change frequently
         $branches = cache()->remember('active_branches', 3600, function () {
             return Branch::where('status', 'active')
@@ -120,8 +126,11 @@ class PricingController extends Controller
      */
     public function destroy(PricingTable $pricing)
     {
+<<<<<<< HEAD
         $this->authorize('delete', $pricing);
         
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         DB::transaction(function () use ($pricing) {
             $pricing->delete();
             // Clear cache if needed

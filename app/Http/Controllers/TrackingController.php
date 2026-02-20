@@ -36,6 +36,7 @@ class TrackingController extends Controller
         // Rate limiting: max 10 attempts per IP per minute
         $key = 'tracking:' . $ip;
         if (RateLimiter::tooManyAttempts($key, 10)) {
+<<<<<<< HEAD
             // Check if request came from welcome page (home)
             $referer = $request->header('referer');
             $fromHome = $request->get('from') === 'home' || 
@@ -48,6 +49,8 @@ class TrackingController extends Controller
                 ])->withInput($request->only('resi_number'));
             }
 
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             return back()->withErrors([
                 'resi_number' => 'Terlalu banyak percobaan. Silakan coba lagi dalam beberapa saat.',
             ]);
@@ -56,9 +59,13 @@ class TrackingController extends Controller
         RateLimiter::hit($key, 60); // 60 seconds window
 
         // Anti brute-force: Log failed attempts
+<<<<<<< HEAD
         // Tracking is public, so we need to disable BranchScope to allow tracking from any branch
         $shipment = Shipment::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
             ->where('resi_number', $resiNumber)
+=======
+        $shipment = Shipment::where('resi_number', $resiNumber)
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             ->with([
                 'courier',
                 'statusHistories.updater',
@@ -77,6 +84,7 @@ class TrackingController extends Controller
                 'ip' => $ip,
             ]);
 
+<<<<<<< HEAD
             // Check if request came from welcome page (home)
             $referer = $request->header('referer');
             $fromHome = $request->get('from') === 'home' || 
@@ -90,6 +98,8 @@ class TrackingController extends Controller
                 ])->withInput($request->only('resi_number'));
             }
 
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             return back()->withErrors([
                 'resi_number' => 'Nomor resi tidak ditemukan. Pastikan nomor resi sudah benar.',
             ]);
@@ -127,7 +137,11 @@ class TrackingController extends Controller
         }
 
         return [
+<<<<<<< HEAD
             'amount' => $shipment->total_cod_collectible,
+=======
+            'amount' => $shipment->cod_amount,
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             'status' => $shipment->cod_status,
             'status_label' => match($shipment->cod_status) {
                 'lunas' => 'Lunas',

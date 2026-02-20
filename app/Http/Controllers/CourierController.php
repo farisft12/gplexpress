@@ -63,11 +63,14 @@ class CourierController extends Controller
                     'status' => 'sampai_di_cabang_tujuan',
                 ]);
             } elseif ($validated['status'] === 'diterima') {
+<<<<<<< HEAD
                 // Validate COD must be paid before status can be changed to diterima
                 if ($shipment->type === 'cod' && $shipment->cod_status !== 'lunas') {
                     return back()->withErrors(['status' => 'Paket COD harus lunas terlebih dahulu sebelum status dapat diubah menjadi diterima.']);
                 }
                 
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                 $shipment->update([
                     'status' => 'diterima',
                     'delivered_at' => now(),
@@ -84,19 +87,31 @@ class CourierController extends Controller
                     'courier_id' => Auth::id(),
                     'shipment_id' => $shipment->id,
                     'type' => 'cod_collected',
+<<<<<<< HEAD
                     'amount' => $shipment->total_cod_collectible,
+=======
+                    'amount' => $shipment->cod_amount,
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                     'notes' => 'COD lunas - ' . $shipment->resi_number,
                 ]);
 
                 // Update current balance
+<<<<<<< HEAD
                 CourierCurrentBalance::updateBalance(Auth::id(), $shipment->total_cod_collectible, 'add');
+=======
+                CourierCurrentBalance::updateBalance(Auth::id(), $shipment->cod_amount, 'add');
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
 
                 // Create financial log (immutable audit trail)
                 FinancialLog::create([
                     'type' => 'COD_COLLECTED',
                     'reference_id' => $shipment->id,
                     'courier_id' => Auth::id(),
+<<<<<<< HEAD
                     'amount' => $shipment->total_cod_collectible,
+=======
+                    'amount' => $shipment->cod_amount,
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                     'actor_id' => Auth::id(),
                     'notes' => 'COD dikumpulkan untuk resi ' . $shipment->resi_number,
                     'metadata' => [

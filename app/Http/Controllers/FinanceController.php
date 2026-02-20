@@ -59,7 +59,11 @@ class FinanceController extends Controller
             ->where('status', 'active')
             ->select('id', 'name', 'email', 'branch_id');
         
+<<<<<<< HEAD
         if (!auth()->user()->isOwner() && auth()->user()->branch_id) {
+=======
+        if (auth()->user()->role !== 'super_admin' && auth()->user()->branch_id) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             $courierQuery->where('branch_id', auth()->user()->branch_id);
         }
         
@@ -96,7 +100,11 @@ class FinanceController extends Controller
             ->whereBetween('delivered_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->selectRaw('
                 COUNT(*) as total_paket,
+<<<<<<< HEAD
                 SUM(cod_amount + COALESCE(cod_shipping_cost,0) + COALESCE(cod_admin_fee,0)) as total_collected
+=======
+                SUM(cod_amount) as total_collected
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             ')
             ->first();
         
@@ -133,7 +141,11 @@ class FinanceController extends Controller
         $outstandingCod = $outstandingCodQuery
             ->selectRaw('
                 COUNT(*) as total_paket,
+<<<<<<< HEAD
                 SUM(cod_amount + COALESCE(cod_shipping_cost,0) + COALESCE(cod_admin_fee,0)) as total_amount
+=======
+                SUM(cod_amount) as total_amount
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             ')
             ->first();
         
@@ -169,7 +181,11 @@ class FinanceController extends Controller
         $courierQuery = User::whereIn('role', ['kurir', 'courier_cabang'])
             ->where('status', 'active');
         
+<<<<<<< HEAD
         if (!auth()->user()->isOwner() && auth()->user()->branch_id) {
+=======
+        if (auth()->user()->role !== 'super_admin' && auth()->user()->branch_id) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             $courierQuery->where('branch_id', auth()->user()->branch_id);
         }
         
@@ -212,7 +228,11 @@ class FinanceController extends Controller
         }
 
         // Verify courier is from same branch (unless super admin)
+<<<<<<< HEAD
         if (!auth()->user()->isOwner() && auth()->user()->branch_id) {
+=======
+        if (auth()->user()->role !== 'super_admin' && auth()->user()->branch_id) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             if ($courier->branch_id !== auth()->user()->branch_id) {
                 return back()->withErrors(['courier_id' => 'Kurir tidak berada di cabang yang sama.']);
             }

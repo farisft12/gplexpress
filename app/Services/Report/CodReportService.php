@@ -14,16 +14,27 @@ class CodReportService
      */
     public function buildQuery(User $user, array $filters = []): Builder
     {
+<<<<<<< HEAD
         $codTotal = 'cod_amount + COALESCE(cod_shipping_cost,0) + COALESCE(cod_admin_fee,0)';
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         $query = Shipment::where('type', 'cod')
             ->select([
                 DB::raw('DATE(created_at) as date'),
                 DB::raw('COUNT(*) as jumlah_paket'),
+<<<<<<< HEAD
                 DB::raw("SUM({$codTotal}) as total_nilai_cod"),
                 DB::raw('SUM(CASE WHEN cod_status = \'lunas\' THEN 1 ELSE 0 END) as cod_lunas'),
                 DB::raw('SUM(CASE WHEN cod_status = \'belum_lunas\' THEN 1 ELSE 0 END) as cod_belum_lunas'),
                 DB::raw("SUM(CASE WHEN cod_status = 'lunas' THEN {$codTotal} ELSE 0 END) as nilai_lunas"),
                 DB::raw("SUM(CASE WHEN cod_status = 'belum_lunas' THEN {$codTotal} ELSE 0 END) as nilai_belum_lunas"),
+=======
+                DB::raw('SUM(cod_amount) as total_nilai_cod'),
+                DB::raw('SUM(CASE WHEN cod_status = \'lunas\' THEN 1 ELSE 0 END) as cod_lunas'),
+                DB::raw('SUM(CASE WHEN cod_status = \'belum_lunas\' THEN 1 ELSE 0 END) as cod_belum_lunas'),
+                DB::raw('SUM(CASE WHEN cod_status = \'lunas\' THEN cod_amount ELSE 0 END) as nilai_lunas'),
+                DB::raw('SUM(CASE WHEN cod_status = \'belum_lunas\' THEN cod_amount ELSE 0 END) as nilai_belum_lunas'),
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             ])
             ->groupBy(DB::raw('DATE(created_at)'));
 
@@ -91,6 +102,7 @@ class CodReportService
             $query->where('courier_id', $filters['courier_id']);
         }
 
+<<<<<<< HEAD
         $codTotal = 'cod_amount + COALESCE(cod_shipping_cost,0) + COALESCE(cod_admin_fee,0)';
         return $query->selectRaw("
                 COUNT(*) as total_paket,
@@ -100,6 +112,16 @@ class CodReportService
                 SUM(CASE WHEN cod_status = 'lunas' THEN {$codTotal} ELSE 0 END) as total_nilai_lunas,
                 SUM(CASE WHEN cod_status = 'belum_lunas' THEN {$codTotal} ELSE 0 END) as total_nilai_belum_lunas
             ")
+=======
+        return $query->selectRaw('
+                COUNT(*) as total_paket,
+                SUM(cod_amount) as total_nilai_cod,
+                SUM(CASE WHEN cod_status = \'lunas\' THEN 1 ELSE 0 END) as total_lunas,
+                SUM(CASE WHEN cod_status = \'belum_lunas\' THEN 1 ELSE 0 END) as total_belum_lunas,
+                SUM(CASE WHEN cod_status = \'lunas\' THEN cod_amount ELSE 0 END) as total_nilai_lunas,
+                SUM(CASE WHEN cod_status = \'belum_lunas\' THEN cod_amount ELSE 0 END) as total_nilai_belum_lunas
+            ')
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             ->first();
     }
 

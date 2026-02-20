@@ -78,7 +78,11 @@ class ProcessPaymentCallback implements ShouldQueue
                         'order_id' => $orderId,
                         'status' => $transactionStatus,
                         'payment_method' => $shipment->payment_method,
+<<<<<<< HEAD
                         'gross_amount' => $this->notification['gross_amount'] ?? $shipment->total_cod_collectible,
+=======
+                        'gross_amount' => $this->notification['gross_amount'] ?? $shipment->cod_amount,
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                         'fraud_status' => $fraudStatus,
                         'notification_data' => $this->notification,
                         'callback_ip' => $this->callbackIp,
@@ -150,7 +154,11 @@ class ProcessPaymentCallback implements ShouldQueue
                                 'courier_id' => $shipment->courier_id,
                                 'shipment_id' => $shipment->id,
                                 'type' => 'cod_collected',
+<<<<<<< HEAD
                                 'amount' => $shipment->total_cod_collectible,
+=======
+                                'amount' => $shipment->cod_amount,
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                                 'notes' => 'COD lunas via QRIS - ' . $shipment->resi_number,
                             ]);
                         } else {

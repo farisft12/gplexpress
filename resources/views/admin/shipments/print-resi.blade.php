@@ -19,7 +19,11 @@
         .header {
             text-align: center;
             border-bottom: 2px solid #000;
+<<<<<<< HEAD
             padding-bottom: 2px;
+=======
+            padding-bottom: 5px;
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             margin-bottom: 5px;
         }
         .company-name {
@@ -62,6 +66,7 @@
             border-top: 1px dashed #000;
             margin: 5px 0;
         }
+<<<<<<< HEAD
         .logo {
             max-width: 100%;
             height: auto;
@@ -71,6 +76,8 @@
             display: block;
             object-fit: contain;
         }
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     </style>
 </head>
 <body>
@@ -84,11 +91,17 @@
     </div>
 
     <div class="header">
+<<<<<<< HEAD
         <img src="{{ asset('img/LOHO.png') }}" alt="GPL Express" class="logo">
+=======
+        <div class="company-name">GPL EXPRES</div>
+        <div style="font-size: 8px;">Jasa Pengiriman Paket</div>
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     </div>
 
     <div class="resi-number">{{ $shipment->resi_number }}</div>
 
+<<<<<<< HEAD
     @if(($shipment->source_type ?? ($shipment->expedition_id ? 'ekspedisi_lain' : 'perorangan')) === 'ekspedisi_lain' && $shipment->external_resi_number)
     <div class="info-section">
         <div style="display: flex; justify-content: space-between;">
@@ -98,6 +111,8 @@
     </div>
     @endif
 
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     <div class="qr-code">
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ urlencode($shipment->resi_number) }}" alt="QR Code">
     </div>
@@ -107,7 +122,11 @@
     <div class="info-section">
         <div class="info-label">PENGIRIM</div>
         <div class="info-value">{{ $shipment->sender_name }}</div>
+<<<<<<< HEAD
         <div class="info-value">{{ $shipment->sender_phone ?? ($shipment->external_resi_number ?? '-') }}</div>
+=======
+        <div class="info-value">{{ $shipment->sender_phone }}</div>
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         <div class="info-value" style="font-size: 8px;">{{ Str::limit($shipment->sender_address, 40) }}</div>
     </div>
 
@@ -146,6 +165,7 @@
             <span class="info-value" style="font-weight: bold;">COD</span>
         </div>
         <div style="display: flex; justify-content: space-between;">
+<<<<<<< HEAD
             <span class="info-label">Nominal COD:</span>
             <span class="info-value">Rp {{ number_format($shipment->cod_amount, 0, ',', '.') }}</span>
         </div>
@@ -160,6 +180,10 @@
         <div style="display: flex; justify-content: space-between; border-top: 1px solid #ccc; padding-top: 3px; margin-top: 3px;">
             <span class="info-label" style="font-weight: bold;">Total:</span>
             <span class="info-value" style="font-weight: bold;">Rp {{ number_format($shipment->total_cod_collectible, 0, ',', '.') }}</span>
+=======
+            <span class="info-label">Nilai COD:</span>
+            <span class="info-value" style="font-weight: bold;">Rp {{ number_format($shipment->cod_amount, 0, ',', '.') }}</span>
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         </div>
     </div>
     @else
@@ -185,6 +209,7 @@
         </div>
     </div>
 
+<<<<<<< HEAD
     <div class="info-section" style="border-bottom: none;">
         <div class="info-value" style="font-size: 8px; text-align: center; font-weight: bold;">
             Bila ada kendala silahkan hubungi CS: 0817779942
@@ -193,6 +218,10 @@
 
     <div class="footer">
         Terima kasih telah menggunakan layanan GPL Express
+=======
+    <div class="footer">
+        Terima kasih telah menggunakan layanan GPL Expres
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     </div>
 
     <script>

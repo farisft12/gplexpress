@@ -41,8 +41,13 @@ class BranchScope implements Scope
         
         $user = Auth::user();
         
+<<<<<<< HEAD
         // Owner can see all branches (no scope applied)
         if (!$user || $user->isOwner()) {
+=======
+        // Super Admin can see all branches
+        if (!$user || $user->role === 'super_admin') {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             return;
         }
         

@@ -47,7 +47,11 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $shipment->sender_name }}</div>
+<<<<<<< HEAD
                                 <div class="text-xs text-gray-500">{{ $shipment->sender_phone ?? ($shipment->external_resi_number ? 'Resi: ' . $shipment->external_resi_number : '-') }}</div>
+=======
+                                <div class="text-xs text-gray-500">{{ $shipment->sender_phone }}</div>
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $shipment->receiver_name }}</div>

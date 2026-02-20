@@ -123,6 +123,7 @@ class ManagerDashboardController extends Controller
             'cod_keluar' => Shipment::where('origin_branch_id', $branchId)
                 ->where('type', 'cod')
                 ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
+<<<<<<< HEAD
                 ->selectRaw('SUM(cod_amount + COALESCE(cod_shipping_cost,0) + COALESCE(cod_admin_fee,0)) as total')
                 ->value('total') ?? 0,
             'cod_masuk' => Shipment::where('destination_branch_id', $branchId)
@@ -130,6 +131,13 @@ class ManagerDashboardController extends Controller
                 ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
                 ->selectRaw('SUM(cod_amount + COALESCE(cod_shipping_cost,0) + COALESCE(cod_admin_fee,0)) as total')
                 ->value('total') ?? 0,
+=======
+                ->sum('cod_amount'),
+            'cod_masuk' => Shipment::where('destination_branch_id', $branchId)
+                ->where('type', 'cod')
+                ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
+                ->sum('cod_amount'),
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         ];
 
         $branches = $user->isOwner() ? \App\Models\Branch::where('status', 'active')->get() : collect();

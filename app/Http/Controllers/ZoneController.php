@@ -33,8 +33,13 @@ class ZoneController extends Controller
 
         $zones = $query->paginate(20);
         
+<<<<<<< HEAD
         // Get branches for filter (owner only)
         $branches = auth()->user()->isOwner() ? Branch::all() : collect();
+=======
+        // Get branches for filter (super admin only)
+        $branches = auth()->user()->isSuperAdmin() ? Branch::all() : collect();
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
 
         return view('admin.zones.index', compact('zones', 'branches'));
     }
@@ -46,8 +51,13 @@ class ZoneController extends Controller
     {
         $this->authorize('create', Zone::class);
         
+<<<<<<< HEAD
         // Get branches (owner sees all, others see only their branch)
         if (auth()->user()->isOwner()) {
+=======
+        // Get branches (super admin sees all, others see only their branch)
+        if (auth()->user()->isSuperAdmin()) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             $branches = Branch::where('status', 'active')->get();
         } else {
             $branches = Branch::where('id', auth()->user()->branch_id)
@@ -93,7 +103,11 @@ class ZoneController extends Controller
         $this->authorize('update', $zone);
         
         // Get branches
+<<<<<<< HEAD
         if (auth()->user()->isOwner()) {
+=======
+        if (auth()->user()->isSuperAdmin()) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             $branches = Branch::where('status', 'active')->get();
         } else {
             $branches = Branch::where('id', auth()->user()->branch_id)

@@ -32,7 +32,10 @@ class ZonePolicy
      */
     public function create(User $user): bool
     {
+<<<<<<< HEAD
         // Owner and Admin can create zones
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         return $user->isOwner() || $user->isAdmin();
     }
 
@@ -45,12 +48,16 @@ class ZonePolicy
             return true;
         }
         
+<<<<<<< HEAD
         // Admin and Manager can update zones in their branch
         if (($user->isAdmin() || $user->isManager()) && $user->branch_id) {
             return $zone->branch_id === $user->branch_id;
         }
         
         return false;
+=======
+        return $user->isAdmin() && $user->branch_id === $zone->branch_id;
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     }
 
     /**
@@ -62,11 +69,15 @@ class ZonePolicy
             return true;
         }
         
+<<<<<<< HEAD
         // Admin and Manager can delete zones in their branch
         if (($user->isAdmin() || $user->isManager()) && $user->branch_id) {
             return $zone->branch_id === $user->branch_id;
         }
         
         return false;
+=======
+        return $user->isAdmin() && $user->branch_id === $zone->branch_id;
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     }
 }

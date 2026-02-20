@@ -53,8 +53,13 @@ class SettlementPolicy
      */
     public function create(User $user): bool
     {
+<<<<<<< HEAD
         // Owner and Admin can create (draft)
         return $user->isOwner() || $user->isAdmin();
+=======
+        // Admin can create (draft)
+        return $user->isAdmin();
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     }
 
     /**
@@ -62,11 +67,14 @@ class SettlementPolicy
      */
     public function update(User $user, CourierSettlement $settlement): bool
     {
+<<<<<<< HEAD
         // Owner can update any pending settlement
         if ($user->isOwner()) {
             return $settlement->status === 'pending';
         }
         
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         // Admin can update if status is pending and same branch
         if ($user->isAdmin() && $user->branch_id) {
             return $settlement->branch_id === $user->branch_id && $settlement->status === 'pending';

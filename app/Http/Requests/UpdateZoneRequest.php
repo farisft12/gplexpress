@@ -38,8 +38,13 @@ class UpdateZoneRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+<<<<<<< HEAD
             // Verify branch access (unless owner)
             if (!$this->user()->isOwner() && $this->user()->branch_id != $this->branch_id) {
+=======
+            // Verify branch access (unless super admin)
+            if ($this->user()->role !== 'super_admin' && $this->user()->branch_id != $this->branch_id) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                 $validator->errors()->add('branch_id', 'Anda tidak memiliki akses ke cabang ini.');
             }
         });

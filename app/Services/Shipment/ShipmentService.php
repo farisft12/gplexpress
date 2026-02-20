@@ -36,15 +36,19 @@ class ShipmentService
 
         $shipmentData = [
             'resi_number' => Shipment::generateResiNumber(),
+<<<<<<< HEAD
             'source_type' => $data['source_type'] ?? 'perorangan',
             'expedition_id' => $data['source_type'] === 'ekspedisi_lain' ? ($data['expedition_id'] ?? null) : null,
             'external_resi_number' => $data['source_type'] === 'ekspedisi_lain' ? ($data['external_resi_number'] ?? null) : null,
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             'branch_id' => $branchId,
             'origin_branch_id' => $data['origin_branch_id'],
             'destination_branch_id' => $data['destination_branch_id'],
             'package_type' => $data['package_type'],
             'weight' => $data['weight'],
             'type' => $data['type'],
+<<<<<<< HEAD
             'cod_amount' => $data['type'] === 'cod' ? ($data['cod_amount'] ?? 0) : 0,
             'cod_shipping_cost' => $data['type'] === 'cod' ? ($data['cod_shipping_cost'] ?? null) : null,
             'cod_admin_fee' => $data['type'] === 'cod' ? ($data['cod_admin_fee'] ?? null) : null,
@@ -52,6 +56,13 @@ class ShipmentService
             'payment_method' => null,
             'sender_name' => $data['sender_name'],
             'sender_phone' => $data['source_type'] === 'perorangan' ? ($data['sender_phone'] ?? null) : null,
+=======
+            'cod_amount' => $data['type'] === 'cod' ? $data['cod_amount'] : 0,
+            'shipping_cost' => $data['type'] === 'non_cod' ? ($data['shipping_cost'] ?? null) : null,
+            'payment_method' => null,
+            'sender_name' => $data['sender_name'],
+            'sender_phone' => $data['sender_phone'],
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             'sender_address' => $data['sender_address'],
             'receiver_name' => $data['receiver_name'],
             'receiver_phone' => $data['receiver_phone'],
@@ -97,14 +108,18 @@ class ShipmentService
         }
 
         $updateData = [
+<<<<<<< HEAD
             'source_type' => $data['source_type'] ?? $shipment->source_type ?? 'perorangan',
             'expedition_id' => $data['source_type'] === 'ekspedisi_lain' ? ($data['expedition_id'] ?? null) : null,
             'external_resi_number' => $data['source_type'] === 'ekspedisi_lain' ? ($data['external_resi_number'] ?? null) : null,
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             'origin_branch_id' => $data['origin_branch_id'],
             'destination_branch_id' => $data['destination_branch_id'],
             'package_type' => $data['package_type'],
             'weight' => $data['weight'],
             'type' => $data['type'],
+<<<<<<< HEAD
             'cod_amount' => $data['type'] === 'cod' ? ($data['cod_amount'] ?? 0) : 0,
             'cod_shipping_cost' => $data['type'] === 'cod' ? ($data['cod_shipping_cost'] ?? null) : null,
             'cod_admin_fee' => $data['type'] === 'cod' ? ($data['cod_admin_fee'] ?? null) : null,
@@ -112,6 +127,13 @@ class ShipmentService
             'payment_method' => $shipment->payment_method,
             'sender_name' => $data['sender_name'],
             'sender_phone' => $data['source_type'] === 'perorangan' ? ($data['sender_phone'] ?? null) : null,
+=======
+            'cod_amount' => $data['type'] === 'cod' ? $data['cod_amount'] : 0,
+            'shipping_cost' => $data['type'] === 'non_cod' ? ($data['shipping_cost'] ?? null) : null,
+            'payment_method' => $shipment->payment_method, // Keep existing value
+            'sender_name' => $data['sender_name'],
+            'sender_phone' => $data['sender_phone'],
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             'sender_address' => $data['sender_address'],
             'receiver_name' => $data['receiver_name'],
             'receiver_phone' => $data['receiver_phone'],

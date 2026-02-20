@@ -40,6 +40,7 @@ class ShipmentPolicy
             return true;
         }
         
+<<<<<<< HEAD
         // Manager & Admin: same branch (origin) OR destination branch (for in-transit packages)
         // If branch_id is null, allow access (for legacy data or unassigned users)
         if ($user->isManager() || $user->isAdmin()) {
@@ -56,6 +57,14 @@ class ShipmentPolicy
                 }
                 
                 return false;
+=======
+        // Manager & Admin: same branch (if branch_id is set)
+        // If branch_id is null, allow access (for legacy data or unassigned users)
+        if ($user->isManager() || $user->isAdmin()) {
+            // If user has branch_id, check if it matches shipment's branch_id
+            if ($user->branch_id) {
+            return $shipment->branch_id === $user->branch_id;
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             }
             // If user has no branch_id, allow access (consistent with viewAny)
             return true;
@@ -83,11 +92,16 @@ class ShipmentPolicy
      */
     public function update(User $user, Shipment $shipment): bool
     {
+<<<<<<< HEAD
         // Owner can update all shipments regardless of status or branch
+=======
+        // Owner can update all
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         if ($user->isOwner()) {
             return true;
         }
         
+<<<<<<< HEAD
         // Admin: can update if status is pickup
         if ($user->isAdmin()) {
             // Status must be pickup to allow editing
@@ -156,6 +170,11 @@ class ShipmentPolicy
         // Kurir: can update status of their own shipments
         if ($user->isKurir()) {
             return $shipment->courier_id === $user->id;
+=======
+        // Admin: same branch and status is pickup
+        if ($user->isAdmin() && $user->branch_id) {
+            return $shipment->branch_id === $user->branch_id && $shipment->status === 'pickup';
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         }
         
         return false;
@@ -188,6 +207,7 @@ class ShipmentPolicy
         // General permission check (for assignForm)
         return true;
     }
+<<<<<<< HEAD
 
     /**
      * Determine if user can send notification for the shipment.
@@ -253,4 +273,6 @@ class ShipmentPolicy
         ]);
         return false;
     }
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
 }

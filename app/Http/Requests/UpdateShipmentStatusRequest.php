@@ -11,6 +11,7 @@ class UpdateShipmentStatusRequest extends FormRequest
      */
     public function authorize(): bool
     {
+<<<<<<< HEAD
         // Get shipment ID from route parameter (could be shipmentId or shipment)
         $shipmentParam = $this->route('shipmentId') ?? $this->route('shipment');
         
@@ -55,6 +56,9 @@ class UpdateShipmentStatusRequest extends FormRequest
         ]);
         
         return $result;
+=======
+        return $this->user()->can('update', $this->route('shipment'));
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     }
 
     /**

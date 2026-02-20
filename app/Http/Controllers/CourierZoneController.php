@@ -21,7 +21,11 @@ class CourierZoneController extends Controller
         }
 
         // Verify courier is from same branch (unless super admin)
+<<<<<<< HEAD
         if (!auth()->user()->isOwner() && auth()->user()->branch_id) {
+=======
+        if (auth()->user()->role !== 'super_admin' && auth()->user()->branch_id) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             if ($courier->branch_id !== auth()->user()->branch_id) {
                 abort(403);
             }
@@ -52,7 +56,11 @@ class CourierZoneController extends Controller
         }
 
         // Verify courier is from same branch (unless super admin)
+<<<<<<< HEAD
         if (!auth()->user()->isOwner() && auth()->user()->branch_id) {
+=======
+        if (auth()->user()->role !== 'super_admin' && auth()->user()->branch_id) {
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             if ($courier->branch_id !== auth()->user()->branch_id) {
                 abort(403);
             }

@@ -14,9 +14,12 @@ class Shipment extends Model
 
     protected $fillable = [
         'resi_number',
+<<<<<<< HEAD
         'source_type',
         'expedition_id',
         'external_resi_number',
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         'branch_id',
         'origin_branch_id',
         'destination_branch_id',
@@ -25,8 +28,11 @@ class Shipment extends Model
         'weight',
         'type',
         'cod_amount',
+<<<<<<< HEAD
         'cod_shipping_cost',
         'cod_admin_fee',
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         'shipping_cost',
         'payment_method',
         'payment_transaction_id',
@@ -58,8 +64,11 @@ class Shipment extends Model
 
     protected $casts = [
         'cod_amount' => 'decimal:2',
+<<<<<<< HEAD
         'cod_shipping_cost' => 'decimal:2',
         'cod_admin_fee' => 'decimal:2',
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         'shipping_cost' => 'decimal:2',
         'weight' => 'decimal:2',
         'assigned_at' => 'datetime',
@@ -70,6 +79,7 @@ class Shipment extends Model
     ];
 
     /**
+<<<<<<< HEAD
      * Get total COD amount to collect (Nominal + Ongkir + Admin)
      * Backward compatible: old COD has null cod_shipping_cost/cod_admin_fee, so total = cod_amount
      */
@@ -83,6 +93,8 @@ class Shipment extends Model
     }
 
     /**
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
      * Generate unique resi number
      */
     public static function generateResiNumber(): string
@@ -119,6 +131,7 @@ class Shipment extends Model
     }
 
     /**
+<<<<<<< HEAD
      * Get expedition (for ekspedisi_lain source type)
      */
     public function expedition(): BelongsTo
@@ -127,6 +140,8 @@ class Shipment extends Model
     }
 
     /**
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
      * Get courier
      */
     public function courier(): BelongsTo

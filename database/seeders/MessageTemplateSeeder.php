@@ -73,6 +73,7 @@ class MessageTemplateSeeder extends Seeder
                 'is_active' => true,
                 'variables' => ['resi', 'receiver_name'],
             ],
+<<<<<<< HEAD
             [
                 'code' => 'paket_sampai_cabang',
                 'name' => 'Paket Sampai di Cabang Tujuan',
@@ -83,6 +84,8 @@ class MessageTemplateSeeder extends Seeder
                 'is_active' => true,
                 'variables' => ['resi', 'receiver_name', 'destination_branch_name', 'sender_name', 'type', 'external_resi_label', 'external_resi', 'cod_breakdown'],
             ],
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         ];
 
         foreach ($templates as $template) {

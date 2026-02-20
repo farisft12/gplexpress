@@ -35,6 +35,7 @@
                         @csrf
                         
                         @if ($errors->any())
+<<<<<<< HEAD
                             <div class="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-4 rounded-lg shadow-sm">
                                 <div class="flex items-start">
                                     <svg class="w-6 h-6 text-red-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,6 +46,11 @@
                                         <p class="text-sm">{{ $errors->first() }}</p>
                                     </div>
                                 </div>
+=======
+                            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                                <strong class="font-semibold">Error:</strong>
+                                <span class="block sm:inline">{{ $errors->first() }}</span>
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                             </div>
                         @endif
 

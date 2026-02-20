@@ -168,12 +168,15 @@ class CourierScanController extends Controller
                         'status' => 'sampai_di_cabang_tujuan',
                     ]);
                 } elseif ($validated['status'] === 'diterima') {
+<<<<<<< HEAD
                     // Validate COD must be paid before status can be changed to diterima
                     if ($package->type === 'cod' && $package->cod_status !== 'lunas') {
                         $failed++;
                         continue; // Skip this package
                     }
                     
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                     $package->update([
                         'status' => 'diterima',
                         'delivered_at' => now(),

@@ -260,6 +260,7 @@ class ShipmentService
             throw new \Exception('Perubahan status tidak valid.');
         }
 
+<<<<<<< HEAD
         // Validate COD must be paid before status can be changed to diterima
         if ($validatedData['status'] === 'diterima' && $shipment->type === 'cod') {
             if ($shipment->cod_status !== 'lunas') {
@@ -268,6 +269,11 @@ class ShipmentService
             if (empty($validatedData['payment_method'])) {
                 throw new \Exception('Metode pembayaran wajib diisi untuk paket COD yang diterima.');
             }
+=======
+        // Validate payment_method is required for COD when status becomes diterima
+        if ($validatedData['status'] === 'diterima' && $shipment->type === 'cod' && empty($validatedData['payment_method'])) {
+            throw new \Exception('Metode pembayaran wajib diisi untuk paket COD yang diterima.');
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         }
 
         DB::transaction(function () use ($shipment, $validatedData) {

@@ -13,6 +13,7 @@ class ShipmentQueryService
      */
     public function buildBaseQuery(User $user, ?string $direction = null): Builder
     {
+<<<<<<< HEAD
         // Branch scope for admin and manager
         if (($user->isAdmin() || $user->isManager()) && $user->branch_id) {
             // For incoming and 'all' directions, we need to disable BranchScope because it filters by branch_id (origin)
@@ -64,6 +65,8 @@ class ShipmentQueryService
         }
         
         // For super_admin/owner: no branch filtering (can see all)
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         $query = Shipment::with([
             'courier:id,name,email',
             'originBranch:id,name,code',
@@ -71,6 +74,28 @@ class ShipmentQueryService
             'branch:id,name,code'
         ])->latest();
 
+<<<<<<< HEAD
+=======
+        // Branch scope for admin and manager
+        if (($user->isAdmin() || $user->isManager()) && $user->branch_id) {
+            // Filter by direction: outgoing (paket keluar) or incoming (paket masuk)
+            if ($direction === 'outgoing') {
+                // Paket keluar: origin_branch_id = current branch
+                $query->where('origin_branch_id', $user->branch_id);
+            } elseif ($direction === 'incoming') {
+                // Paket masuk: destination_branch_id = current branch
+                $query->where('destination_branch_id', $user->branch_id);
+            } else {
+                // Default: show both (paket keluar dan masuk)
+                $query->where(function($q) use ($user) {
+                    $q->where('origin_branch_id', $user->branch_id)
+                      ->orWhere('destination_branch_id', $user->branch_id);
+                });
+            }
+        }
+        // For super_admin/owner: no branch filtering (can see all)
+
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         return $query;
     }
 

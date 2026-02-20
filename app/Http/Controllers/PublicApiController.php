@@ -16,9 +16,13 @@ class PublicApiController extends Controller
      */
     public function track(string $resi): JsonResponse
     {
+<<<<<<< HEAD
         // Tracking is public, so we need to disable BranchScope to allow tracking from any branch
         $shipment = Shipment::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
             ->where('resi_number', $resi)
+=======
+        $shipment = Shipment::where('resi_number', $resi)
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             ->with([
                 'courier:id,name',
                 'shipmentSla.slaDefinition',
@@ -142,7 +146,11 @@ class PublicApiController extends Controller
         }
 
         return [
+<<<<<<< HEAD
             'amount' => $shipment->total_cod_collectible,
+=======
+            'amount' => $shipment->cod_amount,
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             'status' => $shipment->cod_status,
             'status_label' => match($shipment->cod_status) {
                 'lunas' => 'Lunas',

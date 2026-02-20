@@ -26,6 +26,7 @@ class TemplateService
         foreach ($variables as $key => $value) {
             $content = str_replace('{{' . $key . '}}', $value, $content);
         }
+<<<<<<< HEAD
         
         // Clean up: remove lines that are completely empty or only contain ":" (after variable replacement)
         $lines = explode("\n", $content);
@@ -50,6 +51,8 @@ class TemplateService
         
         $content = implode("\n", $cleanedLines);
         $content = trim($content); // Remove leading/trailing whitespace
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
 
         return $content;
     }
@@ -72,6 +75,7 @@ class TemplateService
         }
 
         $branchName = $shipment->branch?->name ?? 'GPL Expres';
+<<<<<<< HEAD
         $destinationBranchName = $shipment->destinationBranch?->name ?? 'GPL Expres';
         
         // External resi handling
@@ -100,16 +104,23 @@ class TemplateService
             
             $codBreakdown = "* Nominal COD: {$codNominal}\n* Ongkir: {$codOngkir}\n* Admin COD: {$codAdmin}\n\n*total : {$codTotal}*";
         }
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         
         return array_merge([
             'resi' => $shipment->resi_number,
             'status' => $this->getStatusLabel($shipment->status),
             'eta' => $eta,
+<<<<<<< HEAD
             'amount' => $shipment->isCOD() ? 'Rp ' . number_format($shipment->total_cod_collectible, 0, ',', '.') : 'N/A',
+=======
+            'amount' => $shipment->cod_amount ? 'Rp ' . number_format($shipment->cod_amount, 0, ',', '.') : 'N/A',
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             'receiver_name' => $shipment->receiver_name,
             'receiver_phone' => $this->maskPhone($shipment->receiver_phone),
             'sender_name' => $shipment->sender_name,
             'branch_name' => $branchName,
+<<<<<<< HEAD
             'destination_branch_name' => $destinationBranchName,
             'sla_status' => $slaStatus,
             'courier_name' => $shipment->courier?->name ?? 'Belum diassign',
@@ -122,6 +133,10 @@ class TemplateService
             'cod_ongkir' => $shipment->isCOD() ? 'Rp ' . number_format($shipment->cod_shipping_cost ?? 0, 0, ',', '.') : '',
             'cod_admin' => $shipment->isCOD() ? 'Rp ' . number_format($shipment->cod_admin_fee ?? 0, 0, ',', '.') : '',
             'cod_total' => $shipment->isCOD() ? 'Rp ' . number_format($shipment->total_cod_collectible, 0, ',', '.') : '',
+=======
+            'sla_status' => $slaStatus,
+            'courier_name' => $shipment->courier?->name ?? 'Belum diassign',
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         ], $additionalData);
     }
 

@@ -124,6 +124,7 @@ class ReportController extends Controller
             $query->where('courier_id', $request->courier_id);
         }
 
+<<<<<<< HEAD
         // Get summary before pagination - use cloned query for aggregation
         $codTotal = 'cod_amount + COALESCE(cod_shipping_cost,0) + COALESCE(cod_admin_fee,0)';
         $summary = (clone $query)->selectRaw("
@@ -134,6 +135,17 @@ class ReportController extends Controller
             SUM(CASE WHEN cod_status = 'lunas' THEN {$codTotal} ELSE 0 END) as nilai_lunas,
             SUM(CASE WHEN cod_status = 'belum_lunas' THEN {$codTotal} ELSE 0 END) as nilai_belum_lunas
         ")->first();
+=======
+        // Get summary before pagination - optimized with single query
+        $summary = $query->selectRaw('
+            COUNT(*) as total,
+            SUM(CASE WHEN cod_status = \'lunas\' THEN 1 ELSE 0 END) as lunas,
+            SUM(CASE WHEN cod_status = \'belum_lunas\' THEN 1 ELSE 0 END) as belum_lunas,
+            SUM(cod_amount) as total_nilai,
+            SUM(CASE WHEN cod_status = \'lunas\' THEN cod_amount ELSE 0 END) as nilai_lunas,
+            SUM(CASE WHEN cod_status = \'belum_lunas\' THEN cod_amount ELSE 0 END) as nilai_belum_lunas
+        ')->first();
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
 
         $shipments = $query->orderBy('created_at', 'desc')->paginate(50);
 

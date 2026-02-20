@@ -22,6 +22,7 @@ class OwnerDashboardService
             $baseQuery->where('branch_id', $branchId);
         }
 
+<<<<<<< HEAD
         $codTotal = 'cod_amount + COALESCE(cod_shipping_cost,0) + COALESCE(cod_admin_fee,0)';
         $stats = $baseQuery
             ->selectRaw("
@@ -33,6 +34,18 @@ class OwnerDashboardService
                 COUNT(CASE WHEN created_at >= ? THEN 1 END) as month_total_paket,
                 COALESCE(SUM(CASE WHEN created_at >= ? AND type = 'cod' AND cod_status = 'lunas' THEN {$codTotal} END), 0) as month_cod_collected
             ", [
+=======
+        $stats = $baseQuery
+            ->selectRaw('
+                COUNT(CASE WHEN DATE(created_at) = ? THEN 1 END) as today_total_paket,
+                COALESCE(SUM(CASE WHEN DATE(created_at) = ? AND type = \'cod\' AND cod_status = \'lunas\' THEN cod_amount END), 0) as today_cod_collected,
+                COUNT(CASE WHEN DATE(delivered_at) = ? AND status = \'diterima\' THEN 1 END) as today_delivered,
+                COUNT(CASE WHEN created_at >= ? THEN 1 END) as week_total_paket,
+                COALESCE(SUM(CASE WHEN created_at >= ? AND type = \'cod\' AND cod_status = \'lunas\' THEN cod_amount END), 0) as week_cod_collected,
+                COUNT(CASE WHEN created_at >= ? THEN 1 END) as month_total_paket,
+                COALESCE(SUM(CASE WHEN created_at >= ? AND type = \'cod\' AND cod_status = \'lunas\' THEN cod_amount END), 0) as month_cod_collected
+            ', [
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                 $today->format('Y-m-d'), $today->format('Y-m-d'), $today->format('Y-m-d'),
                 $thisWeek->format('Y-m-d H:i:s'), $thisWeek->format('Y-m-d H:i:s'),
                 $thisMonth->format('Y-m-d H:i:s'), $thisMonth->format('Y-m-d H:i:s')

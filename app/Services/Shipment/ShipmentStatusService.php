@@ -53,6 +53,7 @@ class ShipmentStatusService
             throw new \Exception('Perubahan status tidak valid.');
         }
 
+<<<<<<< HEAD
         // Validate COD must be paid before status can be changed to diterima
         if ($data['status'] === 'diterima' && $shipment->type === 'cod') {
             if ($shipment->cod_status !== 'lunas') {
@@ -61,6 +62,11 @@ class ShipmentStatusService
             if (empty($data['payment_method'])) {
                 throw new \Exception('Metode pembayaran wajib diisi untuk paket COD yang diterima.');
             }
+=======
+        // Validate payment_method is required for COD when status becomes diterima
+        if ($data['status'] === 'diterima' && $shipment->type === 'cod' && empty($data['payment_method'])) {
+            throw new \Exception('Metode pembayaran wajib diisi untuk paket COD yang diterima.');
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         }
 
         return DB::transaction(function () use ($shipment, $data, $userId) {
@@ -87,6 +93,7 @@ class ShipmentStatusService
 
             $shipment->update($updateData);
 
+<<<<<<< HEAD
             // Create status history manually with custom notes (observer will skip if already exists)
             // We create it here to ensure we can set custom notes from user input
             $recentHistory = $shipment->statusHistories()
@@ -106,6 +113,14 @@ class ShipmentStatusService
                     $recentHistory->update(['notes' => $data['notes']]);
                 }
             }
+=======
+            // Create status history (will be handled by observer, but we can also do it here for explicit control)
+            $shipment->statusHistories()->create([
+                'status' => $data['status'],
+                'updated_by' => $userId,
+                'notes' => $data['notes'] ?? 'Status diubah',
+            ]);
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
 
             // Send notifications
             $this->sendStatusNotifications($shipment, $data);
@@ -129,8 +144,11 @@ class ShipmentStatusService
             };
 
             if ($templateCode) {
+<<<<<<< HEAD
                 // Load necessary relationships for template rendering
                 $shipment->load(['destinationBranch', 'expedition']);
+=======
+>>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                 $this->notificationService->send($templateCode, $shipment->fresh(), ['whatsapp', 'email']);
             }
 
