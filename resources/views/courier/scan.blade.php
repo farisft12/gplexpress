@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Scan Resi - Ambil Paket - GPL Expres')
+@section('title', 'Scan Resi - Ambil Paket - GPL Express')
 @section('page-title', 'Scan Resi - Ambil Paket')
 
 @section('content')

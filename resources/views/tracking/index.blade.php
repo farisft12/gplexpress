@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lacak Paket - GPL Expres</title>
+    <title>Lacak Paket - GPL Express</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
         <!-- Header -->
         <header class="bg-white shadow-sm">
             <div class="container mx-auto px-4 py-4">
-                <a href="{{ route('home') }}" class="text-xl font-bold text-gray-900">GPL Expres</a>
+                <a href="{{ route('home') }}" class="text-xl font-bold text-gray-900">GPL Express</a>
             </div>
         </header>
 
@@ -90,7 +90,7 @@
         <!-- Footer -->
         <footer class="bg-white border-t border-gray-200 mt-12">
             <div class="container mx-auto px-4 py-6 text-center text-sm text-gray-600">
-                <p>&copy; {{ date('Y') }} GPL Expres. All rights reserved.</p>
+                <p>&copy; {{ date('Y') }} GPL Express. All rights reserved.</p>
             </div>
         </footer>
     </div>

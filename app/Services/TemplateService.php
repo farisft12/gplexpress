@@ -73,9 +73,9 @@ class TemplateService
             };
         }
 
-        $branchName = $shipment->branch?->name ?? 'GPL Expres';
+        $branchName = $shipment->branch?->name ?? 'GPL Express';
 
-        $destinationBranchName = $shipment->destinationBranch?->name ?? 'GPL Expres';
+        $destinationBranchName = $shipment->destinationBranch?->name ?? 'GPL Express';
         
         // External resi handling
         $externalResi = $shipment->external_resi_number ?? '';

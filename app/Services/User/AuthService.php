@@ -128,7 +128,7 @@ class AuthService
             throw new \Exception('Layanan verifikasi WhatsApp sedang tidak tersedia. Silakan hubungi administrator.');
         }
 
-        $message = "Kode verifikasi GPL Expres Anda: {$verification->code}\n\nKode ini berlaku selama 10 menit.\n\nJangan bagikan kode ini kepada siapapun.";
+        $message = "Kode verifikasi GPL Express Anda: {$verification->code}\n\nKode ini berlaku selama 10 menit.\n\nJangan bagikan kode ini kepada siapapun.";
         $result = $this->fonnteService->sendMessage($phone, $message);
 
         if (!$result['success']) {
@@ -213,7 +213,7 @@ class AuthService
             throw new \Exception('Layanan verifikasi WhatsApp sedang tidak tersedia. Silakan hubungi administrator.');
         }
 
-        $message = "Kode verifikasi GPL Expres Anda: {$verification->code}\n\nKode ini berlaku selama 10 menit.\n\nJangan bagikan kode ini kepada siapapun.";
+        $message = "Kode verifikasi GPL Express Anda: {$verification->code}\n\nKode ini berlaku selama 10 menit.\n\nJangan bagikan kode ini kepada siapapun.";
         $result = $this->fonnteService->sendMessage($phone, $message);
 
         if ($result['success']) {

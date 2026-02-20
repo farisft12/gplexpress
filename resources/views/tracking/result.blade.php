@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lacak Paket - {{ $shipment->resi_number }} - GPL Expres</title>
+    <title>Lacak Paket - {{ $shipment->resi_number }} - GPL Express</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50">
@@ -241,7 +241,7 @@
         <footer class="bg-white border-t border-gray-200 mt-12">
             <div class="max-w-4xl mx-auto px-4 py-4">
                 <p class="text-xs text-gray-500 text-center">
-                    &copy; {{ date('Y') }} GPL Expres. All rights reserved.
+                    &copy; {{ date('Y') }} GPL Express. All rights reserved.
                 </p>
             </div>
         </footer>

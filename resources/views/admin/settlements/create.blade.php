@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Buat Settlement - GPL Expres')
+@section('title', 'Buat Settlement - GPL Express')
 @section('page-title', 'Buat Settlement')
 
 @section('content')

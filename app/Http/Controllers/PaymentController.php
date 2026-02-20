@@ -294,7 +294,7 @@ class PaymentController extends Controller
                 'customer_details' => [
                     'first_name' => $shipment->receiver_name,
                     'phone' => $shipment->receiver_phone,
-                    'email' => $shipment->receiver_phone . '@gplexpres.com', // Midtrans requires email
+                    'email' => $shipment->receiver_phone . '@gplexpress.com', // Midtrans requires email
                 ],
                 'item_details' => [
                     [

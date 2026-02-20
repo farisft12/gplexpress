@@ -3,9 +3,9 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="GPL Expres - Solusi ekspedisi cepat & terpercaya. Platform logistik modern dengan tracking real-time dan layanan profesional.">
+    <meta name="description" content="GPL Express - Solusi ekspedisi cepat & terpercaya. Platform logistik modern dengan tracking real-time dan layanan profesional.">
 
-    <title>GPL Expres - Solusi Ekspedisi Cepat & Terpercaya</title>
+    <title>GPL Express - Solusi Ekspedisi Cepat & Terpercaya</title>
 
         <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -120,7 +120,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-[#F4C430]">GPL Expres</h1>
+                    <h1 class="text-2xl font-bold text-[#F4C430]">GPL Express</h1>
                 </div>
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="#fitur" class="text-gray-700 hover:text-[#F4C430] transition-colors font-medium">Fitur</a>
@@ -392,7 +392,7 @@
                 Mulai Kirim & Lacak Paket Sekarang
             </h2>
             <p class="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
-                Bergabunglah dengan ribuan pelanggan yang telah mempercayakan pengiriman mereka kepada GPL Expres
+                Bergabunglah dengan ribuan pelanggan yang telah mempercayakan pengiriman mereka kepada GPL Express
             </p>
             <a href="#lacak" class="inline-block gradient-yellow text-white px-10 py-5 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-[#F4C430]/40 transition-all transform hover:scale-105">
                 Mulai Sekarang
@@ -406,7 +406,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
                 <!-- Logo & About -->
                 <div class="col-span-1 md:col-span-2">
-                    <h3 class="text-2xl font-bold text-[#F4C430] mb-4">GPL Expres</h3>
+                    <h3 class="text-2xl font-bold text-[#F4C430] mb-4">GPL Express</h3>
                     <p class="text-gray-400 mb-4">
                         Platform logistik modern dengan teknologi terdepan untuk memberikan pengalaman pengiriman terbaik.
                     </p>
@@ -416,7 +416,7 @@
                 <div>
                     <h4 class="text-white font-semibold mb-4">Kontak</h4>
                     <ul class="space-y-2 text-gray-400">
-                        <li>Email: info@gplexpres.com</li>
+                        <li>Email: info@gplexpress.com</li>
                         <li>Telepon: (021) 1234-5678</li>
                         <li>WhatsApp: +62 812-3456-7890</li>
                     </ul>
@@ -436,7 +436,7 @@
             <div class="border-t border-gray-800 pt-8">
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <p class="text-gray-400 text-sm">
-                        &copy; {{ date('Y') }} GPL Expres. All rights reserved.
+                        &copy; {{ date('Y') }} GPL Express. All rights reserved.
                     </p>
                     <div class="flex space-x-6 mt-4 md:mt-0">
                         <a href="#" class="text-gray-400 hover:text-[#F4C430] transition-colors">Privacy Policy</a>

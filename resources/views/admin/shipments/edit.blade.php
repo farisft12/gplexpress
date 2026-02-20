@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Paket - GPL Expres')
+@section('title', 'Edit Paket - GPL Express')
 @section('page-title', 'Edit Paket')
 
 @section('content')

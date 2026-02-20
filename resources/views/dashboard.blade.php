@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - GPLEXPRES</title>
+    <title>Dashboard - GPLEXPRESS</title>
     <link rel="icon" href="/favicon.ico">
     
     <!-- Google Fonts -->
@@ -302,7 +302,7 @@
     <!-- Header -->
     <header class="header">
         <nav class="nav">
-            <a href="{{ route('welcome') }}" class="logo">GPLEXPRES</a>
+            <a href="{{ route('welcome') }}" class="logo">GPLEXPRESS</a>
             <div class="user-info">
                 <span class="user-name">{{ Auth::user()->name }}</span>
                 <span class="user-role role-{{ Auth::user()->role }}">
@@ -327,11 +327,11 @@
             </h1>
             <p class="welcome-subtitle">
                 @if(Auth::user()->role === 'admin')
-                    Panel administrator GPLEXPRES - Kelola sistem pengiriman
+                    Panel administrator GPLEXPRESS - Kelola sistem pengiriman
                 @elseif(Auth::user()->role === 'staff')
-                    Panel staff GPLEXPRES - Kelola pengiriman dan pelanggan
+                    Panel staff GPLEXPRESS - Kelola pengiriman dan pelanggan
                 @else
-                    Dashboard pelanggan GPLEXPRES - Lacak dan kelola pengiriman Anda
+                    Dashboard pelanggan GPLEXPRESS - Lacak dan kelola pengiriman Anda
                 @endif
             </p>
         </div>

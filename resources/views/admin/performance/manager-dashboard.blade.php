@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Performance Dashboard - GPL Expres')
+@section('title', 'Performance Dashboard - GPL Express')
 @section('page-title', 'Performance Dashboard')
 
 @section('content')

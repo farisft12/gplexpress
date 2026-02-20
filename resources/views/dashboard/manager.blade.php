@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Manager - GPL Expres')
+@section('title', 'Dashboard Manager - GPL Express')
 @section('page-title', 'Dashboard Manager')
 
 @section('content')

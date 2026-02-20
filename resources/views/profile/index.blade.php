@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Storage;
 // Use model accessor for avatar URL
 @endphp
 
-@section('title', 'Profil - GPL Expres')
+@section('title', 'Profil - GPL Express')
 @section('page-title', 'Profil')
 
 @section('content')

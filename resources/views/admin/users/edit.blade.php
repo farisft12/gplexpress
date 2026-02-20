@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit User - GPL Expres')
+@section('title', 'Edit User - GPL Express')
 @section('page-title', 'Edit User')
 
 @section('content')

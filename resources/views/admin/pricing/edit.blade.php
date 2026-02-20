@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Tarif Harga - GPL Expres')
+@section('title', 'Edit Tarif Harga - GPL Express')
 @section('page-title', 'Edit Tarif Harga')
 
 @section('content')

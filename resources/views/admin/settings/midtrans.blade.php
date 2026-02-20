@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Setting Midtrans - GPL Expres')
+@section('title', 'Setting Midtrans - GPL Express')
 @section('page-title', 'Setting Midtrans')
 
 @section('content')

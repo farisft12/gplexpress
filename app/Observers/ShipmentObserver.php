@@ -170,7 +170,7 @@ class ShipmentObserver
             }
             
             $message .= "\nPaket siap untuk diambil atau akan segera dikirim ke alamat Anda.\n\n";
-            $message .= "Terima kasih telah menggunakan layanan GPL Expres! 🚀";
+            $message .= "Terima kasih telah menggunakan layanan GPL Express! 🚀";
         } else {
             // Message for admin/manager
             $message = "📦 *Notifikasi Paket Masuk*\n\n";
@@ -193,7 +193,7 @@ class ShipmentObserver
             }
             
             $message .= "\nSilakan proses paket sesuai prosedur.\n\n";
-            $message .= "GPL Expres";
+            $message .= "GPL Express";
         }
 
         return $message;

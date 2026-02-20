@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Cabang - GPL Expres')
+@section('title', 'Tambah Cabang - GPL Express')
 @section('page-title', 'Tambah Cabang')
 
 @section('content')

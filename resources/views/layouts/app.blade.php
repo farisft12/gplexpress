@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <title>@yield('title', 'GPL Expres')</title>
+    <title>@yield('title', 'GPL Express')</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,7 +33,7 @@
         >
             <!-- Sidebar Header -->
             <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-                <a href="{{ route('dashboard') }}" class="text-xl font-bold text-[#F4C430]">GPL Expres</a>
+                <a href="{{ route('dashboard') }}" class="text-xl font-bold text-[#F4C430]">GPL Express</a>
                 <button @click="sidebarOpen = false" class="lg:hidden text-gray-500 hover:text-gray-700">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

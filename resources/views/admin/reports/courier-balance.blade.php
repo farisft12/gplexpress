@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Saldo Kurir - GPL Expres')
+@section('title', 'Saldo Kurir - GPL Express')
 @section('page-title', 'Saldo Kurir')
 
 @section('content')

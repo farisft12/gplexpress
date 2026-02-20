@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Setting Fonnte - GPL Expres')
+@section('title', 'Setting Fonnte - GPL Express')
 @section('page-title', 'Setting Fonnte')
 
 @section('content')
