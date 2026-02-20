@@ -211,7 +211,7 @@
                             @if ($errors->has('resi_number'))
                                 <div class="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-4 rounded-lg shadow-sm animate-fade-in">
                                     <div class="flex items-start">
-                                        <svg class="w-6 h-6 text-red-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-6 h-6 text-red-500 mr-3 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
                                         <div>
@@ -233,7 +233,7 @@
                                     name="resi_number"
                                     value="{{ old('resi_number') }}"
                                     placeholder="Masukkan nomor resi (Contoh: GPL20240116123456)"
-                                    class="w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-[#F4C430] focus:border-[#F4C430] outline-none text-base sm:text-lg transition-all @error('resi_number') border-red-500 @else border-gray-200 @enderror"
+                                    class="w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-[#F4C430] focus:border-[#F4C430] outline-none text-base sm:text-lg transition-all @class(['border-red-500' => $errors->has('resi_number'), 'border-gray-200' => !$errors->has('resi_number')])"
                                     required
                                 >
                             </div>
