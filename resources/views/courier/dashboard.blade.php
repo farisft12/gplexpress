@@ -52,6 +52,21 @@
                             <div class="flex-1">
                                 <div class="flex flex-wrap items-center gap-2 mb-2">
                                     <span class="font-bold text-gray-900 text-sm lg:text-base">{{ $shipment->resi_number }}</span>
+                                    @if($shipment->destination_courier_id === auth()->id())
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            Kurir Delivery
+                                        </span>
+                                    @elseif($shipment->courier_id === auth()->id())
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700 flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Kurir Linehaul
+                                        </span>
+                                    @endif
                                     @if($shipment->type === 'cod')
                                         <span class="px-2 py-1 text-xs font-semibold rounded-full bg-[#F4C430]/10 text-[#F4C430]">
                                             COD
@@ -71,11 +86,27 @@
                                 @endif
                             </div>
                             <div>
-                                <button 
-                                    onclick="openUpdateModal({{ $shipment->id }}, '{{ $shipment->resi_number }}', '{{ $shipment->type }}', '{{ $shipment->cod_status }}', {{ $shipment->cod_amount ?? 0 }})"
-                                    class="w-full px-4 py-2.5 bg-[#F4C430] text-white rounded-lg font-medium hover:bg-[#E6B020] transition-colors text-sm lg:text-base">
-                                    Update Status
-                                </button>
+                                @php
+                                    // Check if linehaul courier and package has reached destination
+                                    $isLinehaul = $shipment->courier_id === auth()->id();
+                                    // Check if package has reached destination (current status or in history)
+                                    $hasReachedDestination = $shipment->status === 'sampai_di_cabang_tujuan' 
+                                        || ($shipment->has_reached_destination ?? false);
+                                    $canUpdate = !($isLinehaul && $hasReachedDestination);
+                                @endphp
+                                
+                                @if($canUpdate)
+                                    <button 
+                                        onclick="openUpdateModal({{ $shipment->id }}, '{{ $shipment->resi_number }}', '{{ $shipment->type }}', '{{ $shipment->cod_status }}', {{ $shipment->cod_amount ?? 0 }})"
+                                        class="w-full px-4 py-2.5 bg-[#F4C430] text-white rounded-lg font-medium hover:bg-[#E6B020] transition-colors text-sm lg:text-base">
+                                        Update Status
+                                    </button>
+                                @else
+                                    <div class="w-full px-4 py-2.5 bg-gray-200 text-gray-500 rounded-lg font-medium text-sm lg:text-base text-center cursor-not-allowed">
+                                        Tidak dapat diupdate
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1 text-center">Paket sudah sampai di cabang tujuan</p>
+                                @endif
                             </div>
                         </div>
                     </div>

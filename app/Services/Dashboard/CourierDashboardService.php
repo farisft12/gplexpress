@@ -21,9 +21,23 @@ class CourierDashboardService
             ->first();
 
         // Get active shipments - limit to prevent large dataset issues
-        $activeShipments = Shipment::where('courier_id', $courier->id)
-            ->whereIn('status', ['diproses', 'dalam_pengiriman'])
-            ->with(['originBranch:id,name,code', 'destinationBranch:id,name,code'])
+        // Include both packages assigned as origin courier (courier_id) and destination courier (destination_courier_id)
+        // Disable BranchScope for courier to see all their assigned packages regardless of branch
+        $activeShipments = Shipment::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
+            ->where(function($query) use ($courier) {
+                $query->where('courier_id', $courier->id)
+                      ->orWhere('destination_courier_id', $courier->id);
+            })
+            ->whereIn('status', ['diproses', 'dalam_pengiriman', 'sampai_di_cabang_tujuan'])
+            ->with([
+                'originBranch:id,name,code', 
+                'destinationBranch:id,name,code', 
+                'courier:id,name', 
+                'destinationCourier:id,name'
+            ])
+            ->withExists(['statusHistories as has_reached_destination' => function($query) {
+                $query->where('status', 'sampai_di_cabang_tujuan');
+            }])
             ->latest()
             ->limit(50)
             ->get();

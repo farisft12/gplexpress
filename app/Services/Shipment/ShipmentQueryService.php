@@ -36,6 +36,7 @@ class ShipmentQueryService
                 // BranchScope already filters by branch_id, so we can use it
                 $query = Shipment::with([
                     'courier:id,name,email',
+                    'destinationCourier:id,name,email',
                     'originBranch:id,name,code',
                     'destinationBranch:id,name,code',
                     'branch:id,name,code'
@@ -50,6 +51,7 @@ class ShipmentQueryService
                 $query = Shipment::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
                     ->with([
                         'courier:id,name,email',
+                        'destinationCourier:id,name,email',
                         'originBranch:id,name,code',
                         'destinationBranch:id,name,code',
                         'branch:id,name,code'
@@ -139,7 +141,7 @@ class ShipmentQueryService
                 'originBranch:id,name,code',
                 'destinationBranch:id,name,code'
             ])
-            ->select('id', 'resi_number', 'origin_branch_id', 'destination_branch_id', 'status', 'created_at')
+            ->select('id', 'resi_number', 'origin_branch_id', 'destination_branch_id', 'status', 'created_at', 'type', 'cod_amount', 'cod_status', 'cod_shipping_cost', 'cod_admin_fee', 'receiver_name', 'receiver_phone', 'receiver_address')
             ->latest()
             ->limit($limit);
 

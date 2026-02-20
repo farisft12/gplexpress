@@ -10,10 +10,28 @@
         <p class="text-sm text-gray-600 mt-2">Daftar paket yang sudah Anda ambil</p>
     </div>
 
+    <!-- Tab Filter -->
+    <div class="mb-6">
+        <div class="flex space-x-2">
+            <a href="{{ route('courier.my-packages', ['type' => 'all']) }}" 
+               class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {{ ($type ?? 'all') === 'all' ? 'bg-[#F4C430] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                Semua
+            </a>
+            <a href="{{ route('courier.my-packages', ['type' => 'linehaul']) }}" 
+               class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {{ ($type ?? 'all') === 'linehaul' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                Kurir Linehaul
+            </a>
+            <a href="{{ route('courier.my-packages', ['type' => 'delivery']) }}" 
+               class="px-4 py-2 text-sm font-medium rounded-lg transition-colors {{ ($type ?? 'all') === 'delivery' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
+                Kurir Delivery
+            </a>
+        </div>
+    </div>
+
     @if(session('success'))
         <div class="bg-green-50 border-l-4 border-green-400 text-green-700 p-4 mb-6 rounded-lg" role="alert">
             <div class="flex">
-                <div class="flex-shrink-0">
+                <div class="shrink-0">
                     <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
@@ -28,7 +46,7 @@
     @if($errors->any())
         <div class="bg-red-50 border-l-4 border-red-400 text-red-700 p-4 mb-6 rounded-lg" role="alert">
             <div class="flex">
-                <div class="flex-shrink-0">
+                <div class="shrink-0">
                     <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                     </svg>
@@ -68,7 +86,7 @@
     <!-- Packages Table -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="w-full border-collapse">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -82,9 +100,14 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white">
                     @forelse($packages as $package)
-                        <tr class="hover:bg-gray-50">
+                        @php
+                            $isLinehaul = $package->courier_id === auth()->id();
+                            $isDelivery = $package->destination_courier_id === auth()->id();
+                            $rowClass = $isDelivery ? 'hover:bg-green-50' : ($isLinehaul ? 'hover:bg-blue-50' : 'hover:bg-gray-50');
+                        @endphp
+                        <tr class="{{ $rowClass }}">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <input type="checkbox" 
                                        name="package_ids[]" 
@@ -95,6 +118,23 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ $package->resi_number }}</div>
+                                <div class="flex gap-1 mt-1 items-center">
+                                    @if($isDelivery)
+                                        <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-700 flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            Kurir Delivery
+                                        </span>
+                                    @elseif($isLinehaul)
+                                        <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-700 flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Kurir Linehaul
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                 {{ $package->destinationBranch->name ?? 'N/A' }}
@@ -103,13 +143,14 @@
                                 {{ $package->receiver_name }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full 
-                                    @if($package->status === 'diterima') bg-green-100 text-green-800
-                                    @elseif($package->status === 'dalam_pengiriman') bg-blue-100 text-blue-800
-                                    @elseif($package->status === 'diproses') bg-yellow-100 text-yellow-800
-                                    @elseif($package->status === 'sampai_di_cabang_tujuan') bg-purple-100 text-purple-800
-                                    @else bg-gray-100 text-gray-800
-                                    @endif">
+                                <span @class([
+                                    'px-2 py-1 text-xs font-semibold rounded-full',
+                                    'bg-green-100 text-green-800' => $package->status === 'diterima',
+                                    'bg-blue-100 text-blue-800' => $package->status === 'dalam_pengiriman',
+                                    'bg-yellow-100 text-yellow-800' => $package->status === 'diproses',
+                                    'bg-purple-100 text-purple-800' => $package->status === 'sampai_di_cabang_tujuan',
+                                    'bg-gray-100 text-gray-800' => !in_array($package->status, ['diterima', 'dalam_pengiriman', 'diproses', 'sampai_di_cabang_tujuan']),
+                                ])>
                                     {{ ucfirst(str_replace('_', ' ', $package->status)) }}
                                 </span>
                             </td>
@@ -136,7 +177,21 @@
                                     </a>
 
                                     <!-- Edit Status Icon -->
-                                    @if(in_array($package->status, ['diproses', 'dalam_pengiriman', 'sampai_di_cabang_tujuan']))
+                                    @php
+                                        $isLinehaul = $package->courier_id === auth()->id();
+                                        $isDelivery = $package->destination_courier_id === auth()->id();
+                                        $canEditStatus = false;
+                                        
+                                        // Kurir Linehaul: bisa edit jika status belum sampai_di_cabang_tujuan atau diterima
+                                        if ($isLinehaul && !in_array($package->status, ['sampai_di_cabang_tujuan', 'diterima'])) {
+                                            $canEditStatus = true;
+                                        }
+                                        // Kurir Delivery: bisa edit jika status sudah sampai_di_cabang_tujuan atau dalam_pengiriman
+                                        if ($isDelivery && in_array($package->status, ['sampai_di_cabang_tujuan', 'dalam_pengiriman'])) {
+                                            $canEditStatus = true;
+                                        }
+                                    @endphp
+                                    @if($canEditStatus)
                                         <button onclick="openStatusModal({{ $package->id }}, '{{ $package->resi_number }}', '{{ $package->status }}', '{{ $package->type }}', '{{ $package->cod_status ?? '' }}')" 
                                                 class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
                                                 title="Edit Status">
@@ -146,8 +201,8 @@
                                         </button>
                                     @endif
 
-                                    <!-- Bayar COD Icon -->
-                                    @if($package->type === 'cod' && $package->status === 'sampai_di_cabang_tujuan' && $package->cod_status === 'belum_lunas')
+                                    <!-- Bayar COD Icon - Hanya untuk Kurir Delivery -->
+                                    @if($package->type === 'cod' && $package->destination_courier_id === auth()->id() && $package->cod_status === 'belum_lunas' && in_array($package->status, ['sampai_di_cabang_tujuan', 'dalam_pengiriman']))
                                         <button onclick="openPaymentModal({{ $package->id }}, '{{ $package->resi_number }}', {{ $package->cod_amount }})" 
                                                 class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" 
                                                 title="Bayar COD">
@@ -287,14 +342,8 @@ function getAvailableStatuses(currentStatus, type, codStatus) {
     // Status flow: diproses -> dalam_pengiriman -> sampai_di_cabang_tujuan -> diterima
     if (currentStatus === 'diproses') {
         statuses.push({ value: 'dalam_pengiriman', label: 'Dalam Pengiriman' });
-        if (type === 'cod' && codStatus === 'belum_lunas') {
-            statuses.push({ value: 'cod_lunas', label: 'COD Lunas' });
-        }
     } else if (currentStatus === 'dalam_pengiriman') {
         statuses.push({ value: 'sampai_di_cabang_tujuan', label: 'Sampai di Cabang Tujuan' });
-        if (type === 'cod' && codStatus === 'belum_lunas') {
-            statuses.push({ value: 'cod_lunas', label: 'COD Lunas' });
-        }
     } else if (currentStatus === 'sampai_di_cabang_tujuan') {
         statuses.push({ value: 'diterima', label: 'Diterima' });
         if (type === 'cod' && codStatus === 'belum_lunas') {

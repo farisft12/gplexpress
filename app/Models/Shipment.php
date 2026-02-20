@@ -46,6 +46,13 @@ class Shipment extends Model
         'delivered_at',
         'failed_at',
         'delivery_notes',
+        'cod_collected_by',
+        'cod_collected_at',
+        'cod_payment_received_at',
+        'cod_collection_notes',
+        'destination_courier_id',
+        'destination_courier_assigned_at',
+        'destination_courier_out_for_delivery_at',
     ];
 
     /**
@@ -67,6 +74,10 @@ class Shipment extends Model
         'eta_at' => 'datetime',
         'delivered_at' => 'datetime',
         'failed_at' => 'datetime',
+        'cod_collected_at' => 'datetime',
+        'cod_payment_received_at' => 'datetime',
+        'destination_courier_assigned_at' => 'datetime',
+        'destination_courier_out_for_delivery_at' => 'datetime',
     ];
 
     /**
@@ -175,6 +186,22 @@ class Shipment extends Model
     }
 
     /**
+     * Get destination courier (kurir tujuan yang mengantar dan menagih COD)
+     */
+    public function destinationCourier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'destination_courier_id');
+    }
+
+    /**
+     * Get COD collector (kurir yang menagih COD)
+     */
+    public function codCollector(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cod_collected_by');
+    }
+
+    /**
      * Check if can update status
      */
     public function canUpdateStatus(string $newStatus): bool
@@ -197,9 +224,9 @@ class Shipment extends Model
         }
         
         if ($newStatus === 'cod_lunas') {
-            // COD can be marked as paid when status is diproses or dalam_pengiriman
-            return $this->isCOD() && 
-                   in_array($this->status, ['diproses', 'dalam_pengiriman', 'sampai_di_cabang_tujuan']) && 
+            // COD can only be marked as paid when package has reached destination branch
+            return $this->isCOD() &&
+                   $this->status === 'sampai_di_cabang_tujuan' &&
                    $this->cod_status === 'belum_lunas';
         }
 
@@ -220,6 +247,26 @@ class Shipment extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Check if shipment can be assigned for COD collection
+     */
+    public function canBeAssignedForCodCollection(): bool
+    {
+        return $this->status === 'sampai_di_cabang_tujuan' 
+            && $this->type === 'cod' 
+            && $this->cod_status === 'belum_lunas'
+            && (is_null($this->cod_collected_by) || is_null($this->destination_courier_id));
+    }
+
+    /**
+     * Check if shipment can be assigned to destination courier
+     */
+    public function canBeAssignedToDestinationCourier(): bool
+    {
+        return $this->status === 'sampai_di_cabang_tujuan' 
+            && is_null($this->destination_courier_id);
     }
 }
 

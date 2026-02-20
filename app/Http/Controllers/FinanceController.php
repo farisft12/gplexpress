@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CourierSettlement;
 use App\Models\CourierCurrentBalance;
 use App\Models\FinancialLog;
+use App\Models\OperationalCost;
 use App\Models\Shipment;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -25,49 +26,42 @@ class FinanceController extends Controller
         $dateFrom = $request->get('date_from', now()->startOfMonth()->format('Y-m-d'));
         $dateTo = $request->get('date_to', now()->format('Y-m-d'));
         
-        // Get settlements - optimize eager loading
-        $settlementsQuery = CourierSettlement::with([
-            'courier:id,name,email',
-            'confirmedBy:id,name,email'
-        ])->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59']);
-        
-        // Branch scope for manager and admin
-        if ($user->isManager() && $user->branch_id) {
-            $settlementsQuery->where('branch_id', $user->branch_id);
-        } elseif ($user->isAdmin() && $user->branch_id) {
-            $settlementsQuery->where('branch_id', $user->branch_id);
-        }
-        
-        $settlementsQuery->latest();
-        
-        if ($request->filled('status')) {
-            $settlementsQuery->where('status', $request->status);
-        }
-        
-        if ($request->filled('courier_id')) {
-            $settlementsQuery->where('courier_id', $request->courier_id);
-        }
-        
-        $settlements = $settlementsQuery->paginate(20);
-        
         // Financial Summary
         $summary = $this->getFinancialSummary($dateFrom, $dateTo);
         
-        // Get couriers from same branch (or all for super admin)
-        // Optimize: select only needed columns
-        $courierQuery = User::whereIn('role', ['kurir', 'courier_cabang'])
-            ->where('status', 'active')
-            ->select('id', 'name', 'email', 'branch_id');
+        // Chart data
+        $chartData = $this->getChartData($dateFrom, $dateTo);
         
-
-        if (!auth()->user()->isOwner() && auth()->user()->branch_id) {
-
-            $courierQuery->where('branch_id', auth()->user()->branch_id);
+        // Active courier reports
+        $activeCouriers = $this->getActiveCourierReports($request->get('branch_id'));
+        
+        // Get operational costs data
+        $operationalCostsQuery = OperationalCost::with(['branch:id,name', 'createdBy:id,name'])
+            ->whereBetween('date', [$dateFrom, $dateTo]);
+        
+        // Branch scope for manager and admin
+        if ($user->isManager() && $user->branch_id) {
+            $operationalCostsQuery->where('branch_id', $user->branch_id);
+        } elseif ($user->isAdmin() && $user->branch_id) {
+            $operationalCostsQuery->where('branch_id', $user->branch_id);
         }
         
-        $couriers = $courierQuery->orderBy('name')->get();
+        $operationalCosts = $operationalCostsQuery->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
         
-        return view('admin.settlements.index', compact('settlements', 'couriers', 'summary', 'dateFrom', 'dateTo'));
+        // Get branches for owner filter
+        $branches = $user->isOwner() ? \App\Models\Branch::where('status', 'active')->get() : collect();
+        
+        return view('admin.finance.index', compact(
+            'summary', 
+            'dateFrom', 
+            'dateTo',
+            'chartData',
+            'activeCouriers',
+            'operationalCosts',
+            'branches'
+        ));
     }
     
     /**
@@ -80,15 +74,15 @@ class FinanceController extends Controller
         
         // Build base query with branch filtering
         $shipmentQuery = Shipment::query();
-        $settlementQuery = CourierSettlement::query();
+        $operationalCostQuery = OperationalCost::query();
         
         // Branch scope for manager and admin
         if ($user->isManager() && $user->branch_id) {
             $shipmentQuery->where('branch_id', $user->branch_id);
-            $settlementQuery->where('branch_id', $user->branch_id);
+            $operationalCostQuery->where('branch_id', $user->branch_id);
         } elseif ($user->isAdmin() && $user->branch_id) {
             $shipmentQuery->where('branch_id', $user->branch_id);
-            $settlementQuery->where('branch_id', $user->branch_id);
+            $operationalCostQuery->where('branch_id', $user->branch_id);
         }
         
         // COD Collections
@@ -114,13 +108,12 @@ class FinanceController extends Controller
             ')
             ->first();
         
-        // Settlements
-        $settlements = (clone $settlementQuery)
-            ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+        // Operational Costs
+        $operationalCosts = (clone $operationalCostQuery)
+            ->whereBetween('date', [$dateFrom, $dateTo])
             ->selectRaw('
-                COUNT(*) as total_settlements,
-                SUM(CASE WHEN status = \'confirmed\' THEN amount ELSE 0 END) as total_confirmed,
-                SUM(CASE WHEN status = \'pending\' THEN amount ELSE 0 END) as total_pending
+                COUNT(*) as total_count,
+                SUM(amount) as total_amount
             ')
             ->first();
         
@@ -143,6 +136,13 @@ class FinanceController extends Controller
             ')
             ->first();
         
+        // Calculate Total Pendapatan (COD + Non-COD)
+        $totalPendapatan = ($codCollections->total_collected ?? 0) + ($nonCodRevenue->total_revenue ?? 0);
+        
+        // Calculate Revenue (Total Pendapatan - Biaya Operasional)
+        $operationalCostsTotal = $operationalCosts->total_amount ?? 0;
+        $revenue = $totalPendapatan - $operationalCostsTotal;
+        
         return [
             'cod_collections' => [
                 'total_paket' => $codCollections->total_paket ?? 0,
@@ -152,10 +152,15 @@ class FinanceController extends Controller
                 'total_paket' => $nonCodRevenue->total_paket ?? 0,
                 'total_revenue' => $nonCodRevenue->total_revenue ?? 0,
             ],
-            'settlements' => [
-                'total' => $settlements->total_settlements ?? 0,
-                'confirmed' => $settlements->total_confirmed ?? 0,
-                'pending' => $settlements->total_pending ?? 0,
+            'total_pendapatan' => [
+                'total' => $totalPendapatan,
+            ],
+            'revenue' => [
+                'total' => $revenue,
+            ],
+            'operational_costs' => [
+                'total_count' => $operationalCosts->total_count ?? 0,
+                'total' => $operationalCostsTotal,
             ],
             'outstanding_cod' => [
                 'total_paket' => $outstandingCod->total_paket ?? 0,
@@ -321,5 +326,246 @@ class FinanceController extends Controller
         $this->authorize('view', $settlement);
         $settlement->load(['courier', 'confirmedBy']);
         return view('admin.settlements.show', compact('settlement'));
+    }
+    
+    /**
+     * Get chart data for financial dashboard
+     */
+    protected function getChartData(string $dateFrom, string $dateTo): array
+    {
+        $user = auth()->user();
+        
+        // Build base query with branch filtering
+        $shipmentQuery = Shipment::query();
+        
+        // Branch scope for manager and admin
+        if ($user->isManager() && $user->branch_id) {
+            $shipmentQuery->where('branch_id', $user->branch_id);
+        } elseif ($user->isAdmin() && $user->branch_id) {
+            $shipmentQuery->where('branch_id', $user->branch_id);
+        }
+        
+        // Revenue trends (daily)
+        $revenueTrends = (clone $shipmentQuery)
+            ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->selectRaw('
+                DATE(COALESCE(delivered_at, created_at)) as date,
+                SUM(CASE WHEN type = \'cod\' AND cod_status = \'lunas\' THEN cod_amount ELSE 0 END) as cod_revenue,
+                SUM(CASE WHEN type = \'non_cod\' THEN COALESCE(shipping_cost, 0) ELSE 0 END) as non_cod_revenue
+            ')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+        
+        // COD vs Non-COD comparison
+        $codVsNonCod = (clone $shipmentQuery)
+            ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->selectRaw('
+                SUM(CASE WHEN type = \'cod\' AND cod_status = \'lunas\' THEN cod_amount ELSE 0 END) as cod_total,
+                SUM(CASE WHEN type = \'non_cod\' THEN COALESCE(shipping_cost, 0) ELSE 0 END) as non_cod_total
+            ')
+            ->first();
+        
+        return [
+            'revenue_trends' => [
+                'labels' => $revenueTrends->pluck('date')->toArray(),
+                'cod_data' => $revenueTrends->pluck('cod_revenue')->toArray(),
+                'non_cod_data' => $revenueTrends->pluck('non_cod_revenue')->toArray(),
+            ],
+            'cod_vs_non_cod' => [
+                'cod' => (float) ($codVsNonCod->cod_total ?? 0),
+                'non_cod' => (float) ($codVsNonCod->non_cod_total ?? 0),
+            ],
+        ];
+    }
+    
+    /**
+     * Get active courier reports with balances and performance
+     */
+    protected function getActiveCourierReports(?int $branchId = null): array
+    {
+        $user = auth()->user();
+        
+        $courierQuery = User::whereIn('role', ['kurir', 'courier_cabang'])
+            ->where('status', 'active')
+            ->with('branch:id,name');
+        
+        // Branch filtering
+        if ($branchId) {
+            $courierQuery->where('branch_id', $branchId);
+        } elseif (!$user->isOwner() && $user->branch_id) {
+            $courierQuery->where('branch_id', $user->branch_id);
+        }
+        
+        $couriers = $courierQuery->orderBy('name')->get();
+        
+        $reports = [];
+        foreach ($couriers as $courier) {
+            $balance = CourierCurrentBalance::getBalance($courier->id);
+            
+            // Get performance metrics (last 30 days)
+            $thirtyDaysAgo = now()->subDays(30);
+            $shipments = Shipment::where('courier_id', $courier->id)
+                ->where('created_at', '>=', $thirtyDaysAgo)
+                ->get();
+            
+            $totalPackages = $shipments->count();
+            $delivered = $shipments->where('status', 'diterima')->count();
+            $successRate = $totalPackages > 0 ? round(($delivered / $totalPackages) * 100, 2) : 0;
+            
+            // Recent COD collections (last 7 days)
+            $recentCod = Shipment::where('courier_id', $courier->id)
+                ->where('type', 'cod')
+                ->where('cod_status', 'lunas')
+                ->where(function($q) {
+                    $q->where('cod_payment_received_at', '>=', now()->subDays(7))
+                      ->orWhere(function($q2) {
+                          $q2->whereNull('cod_payment_received_at')
+                             ->where('cod_collected_at', '>=', now()->subDays(7));
+                      });
+                })
+                ->sum('cod_amount');
+            
+            $reports[] = [
+                'id' => $courier->id,
+                'name' => $courier->name,
+                'email' => $courier->email,
+                'branch' => $courier->branch ? $courier->branch->name : 'N/A',
+                'balance' => $balance,
+                'total_packages' => $totalPackages,
+                'delivered' => $delivered,
+                'success_rate' => $successRate,
+                'recent_cod' => $recentCod,
+            ];
+        }
+        
+        return $reports;
+    }
+
+    /**
+     * Show form to create operational cost
+     */
+    public function createOperationalCost()
+    {
+        $this->authorize('create', OperationalCost::class);
+        
+        $user = auth()->user();
+        
+        // Get branches for dropdown
+        if ($user->isOwner()) {
+            $branches = \App\Models\Branch::where('status', 'active')->orderBy('name')->get();
+        } elseif ($user->isAdmin() && $user->branch_id) {
+            $branches = \App\Models\Branch::where('id', $user->branch_id)->get();
+        } else {
+            $branches = collect();
+        }
+        
+        return view('admin.finance.operational-costs.create', compact('branches'));
+    }
+
+    /**
+     * Store operational cost (bulk insert)
+     */
+    public function storeOperationalCost(\App\Http\Requests\StoreOperationalCostRequest $request)
+    {
+        $this->authorize('create', OperationalCost::class);
+        
+        $validated = $request->validated();
+        $user = auth()->user();
+        
+        $operationalCosts = [];
+        $errors = [];
+        
+        // Process each row
+        foreach ($validated['operational_costs'] as $index => $cost) {
+            // If admin, ensure branch_id matches their branch (if provided)
+            if ($user->isAdmin() && $user->branch_id) {
+                // If branch_id is provided, verify it matches admin's branch
+                if (isset($cost['branch_id']) && $cost['branch_id'] != $user->branch_id) {
+                    $errors[] = "Baris " . ($index + 1) . ": Anda hanya dapat menambah biaya operasional untuk cabang Anda sendiri.";
+                    continue;
+                }
+                // If not provided, set to admin's branch
+                if (!isset($cost['branch_id']) || empty($cost['branch_id'])) {
+                    $cost['branch_id'] = $user->branch_id;
+                }
+            }
+            
+            $operationalCosts[] = [
+                'date' => $cost['date'],
+                'description' => $cost['description'],
+                'branch_id' => $cost['branch_id'] ?? null,
+                'amount' => $cost['amount'],
+                'created_by' => $user->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+        
+        if (!empty($errors)) {
+            return back()->withErrors(['operational_costs' => $errors])->withInput();
+        }
+        
+        if (empty($operationalCosts)) {
+            return back()->withErrors(['operational_costs' => ['Minimal harus ada satu baris data yang valid.']])->withInput();
+        }
+        
+        // Bulk insert
+        DB::transaction(function () use ($operationalCosts) {
+            OperationalCost::insert($operationalCosts);
+        });
+        
+        $count = count($operationalCosts);
+        return redirect()->route('admin.finance.index')
+            ->with('success', "Berhasil menambahkan {$count} data biaya operasional.");
+    }
+
+    /**
+     * Show form to edit operational cost
+     */
+    public function editOperationalCost(OperationalCost $operationalCost)
+    {
+        $this->authorize('update', $operationalCost);
+        
+        $user = auth()->user();
+        
+        // Get branches for dropdown
+        if ($user->isOwner()) {
+            $branches = \App\Models\Branch::where('status', 'active')->orderBy('name')->get();
+        } elseif ($user->isAdmin() && $user->branch_id) {
+            $branches = \App\Models\Branch::where('id', $user->branch_id)->get();
+        } else {
+            $branches = collect();
+        }
+        
+        return view('admin.finance.operational-costs.edit', compact('operationalCost', 'branches'));
+    }
+
+    /**
+     * Update operational cost
+     */
+    public function updateOperationalCost(\App\Http\Requests\UpdateOperationalCostRequest $request, OperationalCost $operationalCost)
+    {
+        $this->authorize('update', $operationalCost);
+        
+        $validated = $request->validated();
+        $user = auth()->user();
+        
+        // If admin, ensure branch_id matches their branch (if provided)
+        if ($user->isAdmin() && $user->branch_id) {
+            // If branch_id is provided, verify it matches admin's branch
+            if (isset($validated['branch_id']) && $validated['branch_id'] != $user->branch_id) {
+                return back()->withErrors(['branch_id' => 'Anda hanya dapat mengubah biaya operasional untuk cabang Anda sendiri.']);
+            }
+            // If not provided, set to admin's branch
+            if (!isset($validated['branch_id']) || empty($validated['branch_id'])) {
+                $validated['branch_id'] = $user->branch_id;
+            }
+        }
+        
+        $operationalCost->update($validated);
+        
+        return redirect()->route('admin.finance.index')
+            ->with('success', 'Biaya operasional berhasil diperbarui.');
     }
 }

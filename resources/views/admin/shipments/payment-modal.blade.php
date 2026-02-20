@@ -1,5 +1,5 @@
 <!-- Payment Modal -->
-<div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+<div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 p-4" style="display: none;">
     <div class="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div class="p-6 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-xl font-bold text-gray-900">Bayar COD</h3>
@@ -28,23 +28,11 @@
             
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-3">Metode Pembayaran</label>
-                <div class="space-y-3">
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#F4C430] transition-colors">
-                        <input type="radio" name="payment_method" value="qris" class="mr-3 text-[#F4C430] focus:ring-[#F4C430]" required>
-                        <div class="flex-1">
-                            <div class="font-semibold text-gray-900">QRIS</div>
-                            <div class="text-sm text-gray-600">Bayar dengan QRIS (Midtrans)</div>
-                        </div>
-                    </label>
-                    
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#F4C430] transition-colors">
-                        <input type="radio" name="payment_method" value="cash" class="mr-3 text-[#F4C430] focus:ring-[#F4C430]" required>
-                        <div class="flex-1">
-                            <div class="font-semibold text-gray-900">Cash</div>
-                            <div class="text-sm text-gray-600">Bayar tunai langsung</div>
-                        </div>
-                    </label>
+                <div class="p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
+                    <div class="font-semibold text-gray-900">Cash</div>
+                    <div class="text-sm text-gray-600">Bayar tunai langsung</div>
                 </div>
+                <input type="hidden" name="payment_method" value="cash">
             </div>
             
             <div class="flex gap-3">
@@ -74,33 +62,20 @@
             paymentMethod.checked = false;
         }
         
-        // Update form action based on payment method
-        const formSubmitHandler = function(e) {
-            e.preventDefault();
-            const selectedMethod = form.querySelector('input[name="payment_method"]:checked');
-            if (!selectedMethod) {
-                alert('Pilih metode pembayaran terlebih dahulu');
-                return;
-            }
-            
-            if (selectedMethod.value === 'qris') {
-                form.action = '{{ url("/courier/shipments") }}/' + shipmentId + '/payment/qris';
-            } else if (selectedMethod.value === 'cash') {
-                form.action = '{{ url("/courier/shipments") }}/' + shipmentId + '/payment/cash';
-            }
-            
-            form.submit();
-        };
+        // Set form action to cash payment endpoint
+        form.action = '{{ url("/courier/shipments") }}/' + shipmentId + '/payment/cash';
         
-        // Remove existing listener if any
-        form.removeEventListener('submit', formSubmitHandler);
-        form.addEventListener('submit', formSubmitHandler);
-        
-        document.getElementById('paymentModal').classList.remove('hidden');
+        const modal = document.getElementById('paymentModal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        modal.classList.add('items-center', 'justify-center');
     }
     
     function closePaymentModal() {
-        document.getElementById('paymentModal').classList.add('hidden');
+        const modal = document.getElementById('paymentModal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        modal.classList.remove('items-center', 'justify-center');
     }
     
     // Close modal when clicking outside

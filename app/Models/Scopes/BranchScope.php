@@ -54,9 +54,12 @@ class BranchScope implements Scope
         
         // Courier Cabang: scope to their own records only
         if ($user->role === 'courier_cabang') {
-            // For shipments, courier can only see their assigned shipments
+            // For shipments, courier can see packages assigned to them as origin courier OR destination courier
             if ($table === 'shipments') {
-                $builder->where('courier_id', $user->id);
+                $builder->where(function($q) use ($user) {
+                    $q->where('courier_id', $user->id)
+                      ->orWhere('destination_courier_id', $user->id);
+                });
             } else {
                 // For other tables, scope by branch
                 if ($user->branch_id) {
@@ -69,7 +72,11 @@ class BranchScope implements Scope
         // Legacy roles: admin, manager, kurir - scope by branch if exists
         if (in_array($user->role, ['admin', 'manager', 'kurir']) && $user->branch_id) {
             if ($table === 'shipments' && $user->role === 'kurir') {
-                $builder->where('courier_id', $user->id);
+                // Kurir can see packages assigned to them as origin courier OR destination courier
+                $builder->where(function($q) use ($user) {
+                    $q->where('courier_id', $user->id)
+                      ->orWhere('destination_courier_id', $user->id);
+                });
             } else {
                 $builder->where($table . '.branch_id', $user->branch_id);
             }

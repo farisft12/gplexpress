@@ -15,6 +15,7 @@ class CourierCurrentBalance extends Model
     protected $fillable = [
         'courier_id',
         'current_balance',
+        'updated_at',
     ];
 
     protected $casts = [
@@ -36,10 +37,17 @@ class CourierCurrentBalance extends Model
     public static function updateBalance(int $courierId, float $amount, string $operation = 'add'): void
     {
         \DB::transaction(function () use ($courierId, $amount, $operation) {
-            $balance = self::firstOrCreate(
-                ['courier_id' => $courierId],
-                ['current_balance' => 0, 'updated_at' => now()]
-            );
+            $balance = self::where('courier_id', $courierId)->first();
+            $now = now();
+
+            if (!$balance) {
+                // Create new record with updated_at using create method
+                $balance = self::create([
+                    'courier_id' => $courierId,
+                    'current_balance' => 0,
+                    'updated_at' => $now,
+                ]);
+            }
 
             if ($operation === 'add') {
                 $balance->current_balance += $amount;
@@ -50,7 +58,7 @@ class CourierCurrentBalance extends Model
                 }
             }
 
-            $balance->updated_at = now();
+            $balance->updated_at = $now;
             $balance->save();
         });
     }

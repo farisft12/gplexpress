@@ -6,6 +6,7 @@ use App\Models\Shipment;
 use App\Models\CourierSettlement;
 use App\Models\Branch;
 use App\Models\User;
+use App\Models\OperationalCost;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -39,11 +40,40 @@ class OwnerDashboardService
             ])
             ->first();
 
-        $settlementQuery = CourierSettlement::query();
+        // Calculate Revenue (Total Pendapatan - Biaya Operasional)
+        // Total Pendapatan (COD + Non-COD)
+        $codRevenueQuery = Shipment::query();
         if ($branchId) {
-            $settlementQuery->where('branch_id', $branchId);
+            $codRevenueQuery->where('branch_id', $branchId);
         }
-        $pendingSettlements = $settlementQuery->where('status', 'pending')->count();
+        $codRevenue = $codRevenueQuery
+            ->where('type', 'cod')
+            ->where('cod_status', 'lunas')
+            ->selectRaw("COALESCE(SUM({$codTotal}), 0) as total")
+            ->value('total') ?? 0;
+        
+        $nonCodRevenueQuery = Shipment::query();
+        if ($branchId) {
+            $nonCodRevenueQuery->where('branch_id', $branchId);
+        }
+        $nonCodRevenue = $nonCodRevenueQuery
+            ->where('type', 'non_cod')
+            ->where('status', 'diterima')
+            ->selectRaw("COALESCE(SUM(shipping_cost), 0) as total")
+            ->value('total') ?? 0;
+        
+        $totalPendapatan = $codRevenue + $nonCodRevenue;
+        
+        // Biaya Operasional
+        $operationalCostQuery = OperationalCost::query();
+        if ($branchId) {
+            $operationalCostQuery->where('branch_id', $branchId);
+        }
+        $operationalCosts = $operationalCostQuery
+            ->selectRaw("COALESCE(SUM(amount), 0) as total")
+            ->value('total') ?? 0;
+        
+        $revenue = $totalPendapatan - $operationalCosts;
 
         $totalBranches = Branch::where('status', 'active')->count();
 
@@ -67,7 +97,7 @@ class OwnerDashboardService
                 'total_paket' => $stats->month_total_paket ?? 0,
                 'cod_collected' => $stats->month_cod_collected ?? 0,
             ],
-            'pending_settlements' => $pendingSettlements,
+            'revenue' => $revenue,
             'total_branches' => $totalBranches,
             'total_couriers' => $totalCouriers,
         ];

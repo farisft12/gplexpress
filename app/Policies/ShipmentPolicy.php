@@ -12,9 +12,9 @@ class ShipmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        // Owner can view all
+        // Owner cannot access shipments page
         if ($user->isOwner()) {
-            return true;
+            return false;
         }
         
         // Manager & Admin can view their branch shipments (even if branch_id is null, allow access)
@@ -65,7 +65,8 @@ class ShipmentPolicy
         
         // Kurir: own shipments only
         if ($user->isKurir()) {
-            return $shipment->courier_id === $user->id;
+            // Can view if assigned as courier or as COD collector
+            return $shipment->courier_id === $user->id || $shipment->cod_collected_by === $user->id;
         }
         
         return false;
@@ -85,45 +86,69 @@ class ShipmentPolicy
      */
     public function update(User $user, Shipment $shipment): bool
     {
-
         // Owner can update all shipments regardless of status or branch
-
         if ($user->isOwner()) {
             return true;
         }
         
-
-        // Admin: can update if status is pickup
+        // Admin: can update ONLY outgoing packages (from their branch)
+        // Incoming packages CANNOT be edited (data), only status can be updated
         if ($user->isAdmin()) {
-            // Status must be pickup to allow editing
-            if ($shipment->status !== 'pickup') {
+            // Don't allow editing if already delivered
+            if ($shipment->status === 'diterima') {
                 return false;
             }
             
-            // If user has branch_id, check if it matches shipment's branch_id
+            // Only allow editing outgoing packages (from origin branch)
+            // Incoming packages (destination branch) cannot edit data
             if ($user->branch_id) {
-                return $shipment->branch_id === $user->branch_id;
+                // Check origin branch access - can edit if from their branch (outgoing packages only)
+                // Check both branch_id (legacy) and origin_branch_id (new)
+                if (($shipment->branch_id === $user->branch_id) || 
+                    ($shipment->origin_branch_id === $user->branch_id)) {
+                    return true;
+                }
+                
+                // Block editing for incoming packages (destination branch)
+                // They can only update status, not data
+                return false;
             }
             
             // If user has no branch_id, allow access (consistent with view)
             return true;
         }
         
-        // Manager: can update if status is pickup and from their branch
+        // Manager: can update ONLY outgoing packages (from their branch)
+        // Incoming packages CANNOT be edited (data), only status can be updated
         if ($user->isManager()) {
-            // Status must be pickup to allow editing
-            if ($shipment->status !== 'pickup') {
+            // Don't allow editing if already delivered
+            if ($shipment->status === 'diterima') {
                 return false;
             }
             
-            // Must be from their branch
+            // Only allow editing outgoing packages (from origin branch)
+            // Incoming packages (destination branch) cannot edit data
             if ($user->branch_id) {
-                return $shipment->branch_id === $user->branch_id;
+                // Check origin branch access - can edit if from their branch (outgoing packages only)
+                // Check both branch_id (legacy) and origin_branch_id (new)
+                if (($shipment->branch_id === $user->branch_id) || 
+                    ($shipment->origin_branch_id === $user->branch_id)) {
+                    return true;
+                }
+                
+                // Block editing for incoming packages (destination branch)
+                // They can only update status, not data
+                return false;
             }
             
             return false;
         }
         
+        \Log::warning('ShipmentPolicy::update: Denied - role not allowed', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'shipment_id' => $shipment->id,
+        ]);
         return false;
     }
 
@@ -258,6 +283,49 @@ class ShipmentPolicy
         \Log::warning('ShipmentPolicy::sendNotification: Not authorized (Role not allowed)', [
             'user_role' => $user->role,
         ]);
+        return false;
+    }
+
+    /**
+     * Determine if the user can assign COD to courier
+     */
+    public function assignCod(User $user, Shipment $shipment): bool
+    {
+        // Owner can assign all COD shipments
+        if ($user->isOwner()) {
+            return true;
+        }
+
+        // Admin/Manager from destination branch can assign COD
+        if (($user->isAdmin() || $user->isManager()) && $user->branch_id) {
+            return $shipment->destination_branch_id === $user->branch_id
+                && $shipment->status === 'sampai_di_cabang_tujuan'
+                && $shipment->type === 'cod'
+                && $shipment->cod_status === 'belum_lunas';
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine if the user can collect COD (input payment)
+     */
+    public function collectCod(User $user, Shipment $shipment): bool
+    {
+        // Admin/Manager from destination branch can collect COD
+        if (($user->isAdmin() || $user->isManager()) && $user->branch_id) {
+            return $shipment->destination_branch_id === $user->branch_id
+                && $shipment->cod_status === 'belum_lunas';
+        }
+        
+        // Only destination courier can collect COD (not origin courier)
+        if ($user->isKurir()) {
+            // Kurir pengantar (courier_id) TIDAK BISA menagih COD
+            // Hanya kurir tujuan (destination_courier_id) yang bisa menagih COD
+            return $shipment->destination_courier_id === $user->id
+                && $shipment->cod_status === 'belum_lunas';
+        }
+
         return false;
     }
 

@@ -43,13 +43,22 @@
         </form>
     </div>
 
+    <!-- Branch Info -->
+    @if(Auth::user()->isOwner())
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p class="text-sm text-blue-800">
+                <strong>Cabang:</strong> {{ $branchId ? \App\Models\Branch::find($branchId)->name : 'Semua Cabang' }}
+            </p>
+        </div>
+    @endif
+
     <!-- SLA Metrics -->
-    @if(isset($slaMetrics) && count($slaMetrics) > 0)
+    @if(isset($slaMetrics) && isset($slaMetrics['total']) && $slaMetrics['total'] > 0)
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div class="bg-white shadow-md rounded-lg p-6">
             <h3 class="text-lg font-semibold text-gray-700 mb-2">SLA Achievement</h3>
             <div class="text-3xl font-bold text-[#F4C430]">
-                {{ number_format($slaMetrics['achievement_rate'] ?? 0, 1) }}%
+                {{ number_format($slaMetrics['on_time_percentage'] ?? 0, 1) }}%
             </div>
             <p class="text-sm text-gray-500 mt-2">
                 {{ $slaMetrics['on_time'] ?? 0 }} dari {{ $slaMetrics['total'] ?? 0 }} paket tepat waktu

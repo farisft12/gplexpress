@@ -95,13 +95,13 @@
                         </div>
                     </div>
                     
-                    <!-- Zones -->
-                    <a href="{{ route('admin.zones.index') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.zones.*') ? 'bg-[#F4C430]/10 text-[#F4C430]' : 'text-gray-700 hover:bg-gray-100' }}">
+                    {{-- Zones - Hidden as requested --}}
+                    {{-- <a href="{{ route('admin.zones.index') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.zones.*') ? 'bg-[#F4C430]/10 text-[#F4C430]' : 'text-gray-700 hover:bg-gray-100' }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                         </svg>
                         Zones
-                    </a>
+                    </a> --}}
                     
                     <!-- Keuangan -->
                     <a href="{{ route('admin.finance.index') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.finance.*') ? 'bg-[#F4C430]/10 text-[#F4C430]' : 'text-gray-700 hover:bg-gray-100' }}">
@@ -282,11 +282,23 @@
                         </svg>
                         Manajemen Paket
                     </a>
-                    <a href="{{ route('admin.shipments.assign.form') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.shipments.assign.*') ? 'bg-[#F4C430]/10 text-[#F4C430]' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <a href="{{ route('admin.shipments.assign.form') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.shipments.assign.*') && !request()->routeIs('admin.shipments.cod.*') ? 'bg-[#F4C430]/10 text-[#F4C430]' : 'text-gray-700 hover:bg-gray-100' }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                         Assign Paket
+                    </a>
+                    <a href="{{ route('admin.shipments.cod.assign.form') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.shipments.cod.*') ? 'bg-[#F4C430]/10 text-[#F4C430]' : 'text-gray-700 hover:bg-gray-100' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        Assign COD
+                    </a>
+                    <a href="{{ route('admin.shipments.destination-courier.assign.form') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.shipments.destination-courier.*') ? 'bg-[#F4C430]/10 text-[#F4C430]' : 'text-gray-700 hover:bg-gray-100' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Assign Kurir Tujuan
                     </a>
                     
                     <!-- Setting Profil -->
@@ -310,6 +322,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                         </svg>
                         Scan Resi
+                    </a>
+                    <a href="{{ route('courier.cod.dashboard') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('courier.cod.*') ? 'bg-[#F4C430]/10 text-[#F4C430]' : 'text-gray-700 hover:bg-gray-100' }}">
+                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        COD Collection
                     </a>
                     <a href="{{ route('courier.my-packages') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('courier.my-packages') ? 'bg-[#F4C430]/10 text-[#F4C430]' : 'text-gray-700 hover:bg-gray-100' }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -351,7 +369,7 @@
             <!-- Sidebar Footer -->
             <div class="px-4 py-4 border-t border-gray-200">
                 <div class="flex items-center mb-3">
-                    <div class="flex-shrink-0">
+                    <div class="shrink-0">
                         <div class="w-10 h-10 bg-[#F4C430]/10 rounded-full flex items-center justify-center">
                             <span class="text-[#F4C430] font-semibold text-sm">{{ substr(Auth::user()->name, 0, 1) }}</span>
                         </div>
@@ -405,7 +423,7 @@
                             <p class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</p>
                             <p class="text-xs text-gray-500">{{ Auth::user()->email }}</p>
                         </div>
-                        <div class="flex-shrink-0">
+                        <div class="shrink-0">
                             <div class="w-10 h-10 bg-[#F4C430]/10 rounded-full flex items-center justify-center border-2 border-[#F4C430]/20 overflow-hidden">
                                 @if(Auth::user()->avatar_url)
                                     <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="w-full h-full rounded-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -416,13 +434,14 @@
                             </div>
                         </div>
                     </div>
-                    <span class="hidden lg:inline-block px-3 py-1 text-xs font-semibold rounded-full 
-                        @if(Auth::user()->isOwner()) bg-purple-100 text-purple-700
-                        @elseif(Auth::user()->isManager()) bg-blue-100 text-blue-700
-                        @elseif(Auth::user()->isAdmin()) bg-[#F4C430]/10 text-[#F4C430]
-                        @elseif(Auth::user()->isKurir()) bg-green-100 text-green-700
-                        @else bg-gray-100 text-gray-700
-                        @endif">
+                    <span @class([
+                        'hidden lg:inline-block px-3 py-1 text-xs font-semibold rounded-full',
+                        'bg-purple-100 text-purple-700' => Auth::user()->isOwner(),
+                        'bg-blue-100 text-blue-700' => Auth::user()->isManager(),
+                        'bg-[#F4C430]/10 text-[#F4C430]' => Auth::user()->isAdmin(),
+                        'bg-green-100 text-green-700' => Auth::user()->isKurir(),
+                        'bg-gray-100 text-gray-700' => !Auth::user()->isOwner() && !Auth::user()->isManager() && !Auth::user()->isAdmin() && !Auth::user()->isKurir(),
+                    ])>
                         @if(Auth::user()->isOwner()) Owner
                         @elseif(Auth::user()->isManager()) Manager
                         @elseif(Auth::user()->isAdmin()) Admin

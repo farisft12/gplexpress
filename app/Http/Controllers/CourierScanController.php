@@ -84,7 +84,7 @@ class CourierScanController extends Controller
     /**
      * List packages taken by courier
      */
-    public function myPackages()
+    public function myPackages(Request $request)
     {
         $user = Auth::user();
         
@@ -92,17 +92,51 @@ class CourierScanController extends Controller
             abort(403);
         }
 
+        $type = $request->get('type', 'all'); // 'all', 'linehaul', 'delivery'
+
         // Optimize: eager load with specific columns to reduce memory usage
-        $packages = Shipment::where('courier_id', $user->id)
-            ->with([
+        // Include both packages assigned as origin courier (courier_id) and destination courier (destination_courier_id)
+        // Disable BranchScope for courier to see all their assigned packages regardless of branch
+        $query = Shipment::withoutGlobalScope(\App\Models\Scopes\BranchScope::class);
+
+        // Filter berdasarkan type
+        if ($type === 'linehaul') {
+            // Hanya paket dengan courier_id = user->id (Kurir Linehaul)
+            $query->where('courier_id', $user->id);
+        } elseif ($type === 'delivery') {
+            // Hanya paket dengan destination_courier_id = user->id (Kurir Delivery)
+            $query->where('destination_courier_id', $user->id);
+        } else {
+            // All: both linehaul and delivery
+            $query->where(function($q) use ($user) {
+                $q->where('courier_id', $user->id)
+                  ->orWhere('destination_courier_id', $user->id);
+            });
+        }
+
+        $packages = $query->with([
                 'originBranch:id,name,code',
                 'destinationBranch:id,name,code',
-                'zone:id,name'
+                'zone:id,name',
+                'courier:id,name',
+                'destinationCourier:id,name'
             ])
             ->latest()
             ->paginate(20);
 
-        return view('courier.my-packages', compact('packages'));
+        // Append query parameter to pagination links
+        $packages->appends(['type' => $type]);
+
+        // Debug: Log query result for troubleshooting
+        \Log::info('Courier myPackages', [
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'type' => $type,
+            'packages_count' => $packages->total(),
+            'packages' => $packages->pluck('resi_number')->toArray()
+        ]);
+
+        return view('courier.my-packages', compact('packages', 'type'));
     }
 
     /**
@@ -116,8 +150,8 @@ class CourierScanController extends Controller
             abort(403);
         }
 
-        // Verify that this shipment belongs to the courier
-        if ($shipment->courier_id !== $user->id) {
+        // Verify that this shipment belongs to the courier (can be origin courier or destination courier)
+        if ($shipment->courier_id !== $user->id && $shipment->destination_courier_id !== $user->id) {
             abort(403, 'Anda tidak memiliki akses ke paket ini.');
         }
 
@@ -142,8 +176,12 @@ class CourierScanController extends Controller
             'status' => ['required', 'in:dalam_pengiriman,sampai_di_cabang_tujuan,diterima'],
         ]);
 
+        // Include both packages assigned as origin courier and destination courier
         $packages = Shipment::whereIn('id', $validated['package_ids'])
-            ->where('courier_id', $user->id)
+            ->where(function($query) use ($user) {
+                $query->where('courier_id', $user->id)
+                      ->orWhere('destination_courier_id', $user->id);
+            })
             ->get();
 
         $updated = 0;

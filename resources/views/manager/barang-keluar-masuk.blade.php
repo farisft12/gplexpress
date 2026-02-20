@@ -25,10 +25,19 @@
 
     <!-- Filter Date -->
     <div class="bg-white rounded-xl shadow-sm p-4 lg:p-6 mb-6">
-        <form method="GET" action="{{ route('manager.barang-keluar-masuk') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form method="GET" action="{{ route('manager.barang-keluar-masuk') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             @if($branches->isNotEmpty())
                 <input type="hidden" name="branch_id" value="{{ request('branch_id') }}">
             @endif
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Periode Revenue</label>
+                <select name="period" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F4C430] focus:border-transparent outline-none">
+                    <option value="harian" {{ $period == 'harian' ? 'selected' : '' }}>Harian</option>
+                    <option value="mingguan" {{ $period == 'mingguan' ? 'selected' : '' }}>Mingguan</option>
+                    <option value="bulanan" {{ $period == 'bulanan' || !isset($period) ? 'selected' : '' }}>Bulanan</option>
+                    <option value="tahunan" {{ $period == 'tahunan' ? 'selected' : '' }}>Tahunan</option>
+                </select>
+            </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
                 <input type="date" name="date_from" value="{{ $dateFrom }}" 
@@ -67,6 +76,21 @@
         </div>
     </div>
 
+    <!-- Revenue Breakdown -->
+    <div class="mb-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Revenue Breakdown ({{ ucfirst($period) }})</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-indigo-500">
+                <p class="text-sm text-gray-600 mb-1">Revenue {{ ucfirst($period) }} Keluar</p>
+                <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($revenueData['revenue_keluar'] ?? 0, 0, ',', '.') }}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-indigo-400">
+                <p class="text-sm text-gray-600 mb-1">Revenue {{ ucfirst($period) }} Masuk</p>
+                <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($revenueData['revenue_masuk'] ?? 0, 0, ',', '.') }}</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Tabs -->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="border-b border-gray-200">
@@ -100,11 +124,12 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $paket->destinationBranch->name ?? 'N/A' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $paket->receiver_name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full 
-                                        @if($paket->status === 'diterima') bg-green-100 text-green-800
-                                        @elseif($paket->status === 'dalam_pengiriman') bg-blue-100 text-blue-800
-                                        @else bg-yellow-100 text-yellow-800
-                                        @endif">
+                                    <span @class([
+                                        'px-2 py-1 text-xs font-semibold rounded-full',
+                                        'bg-green-100 text-green-800' => $paket->status === 'diterima',
+                                        'bg-blue-100 text-blue-800' => $paket->status === 'dalam_pengiriman',
+                                        'bg-yellow-100 text-yellow-800' => !in_array($paket->status, ['diterima', 'dalam_pengiriman']),
+                                    ])>
                                         {{ ucfirst(str_replace('_', ' ', $paket->status)) }}
                                     </span>
                                 </td>
@@ -145,11 +170,12 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $paket->originBranch->name ?? 'N/A' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $paket->receiver_name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full 
-                                        @if($paket->status === 'diterima') bg-green-100 text-green-800
-                                        @elseif($paket->status === 'dalam_pengiriman') bg-blue-100 text-blue-800
-                                        @else bg-yellow-100 text-yellow-800
-                                        @endif">
+                                    <span @class([
+                                        'px-2 py-1 text-xs font-semibold rounded-full',
+                                        'bg-green-100 text-green-800' => $paket->status === 'diterima',
+                                        'bg-blue-100 text-blue-800' => $paket->status === 'dalam_pengiriman',
+                                        'bg-yellow-100 text-yellow-800' => !in_array($paket->status, ['diterima', 'dalam_pengiriman']),
+                                    ])>
                                         {{ ucfirst(str_replace('_', ' ', $paket->status)) }}
                                     </span>
                                 </td>

@@ -23,27 +23,28 @@ class PerformanceController extends Controller
         }
 
         // Owner can view all branches or specific branch
-        $branchId = $user->isOwner() ? $request->get('branch_id', $user->branch_id) : $user->branch_id;
+        $branchId = $user->isOwner() ? ($request->get('branch_id') ?: null) : $user->branch_id;
         $periodType = $request->get('period', 'week'); // day, week, month
         $periodDate = $request->get('date', now()->format('Y-m-d'));
 
         $dateRange = $this->getDateRange($periodType, $periodDate);
 
-        // Branch SLA Achievement
-        $slaMetrics = $branchId ? $this->getBranchSlaMetrics($branchId, $dateRange) : [];
+        // Branch SLA Achievement - allow null branchId for owner viewing all branches
+        $slaMetrics = $this->getBranchSlaMetrics($branchId, $dateRange);
 
-        // Courier Rankings (read-only)
-        $courierRankings = $branchId ? $this->getCourierRankings($branchId, $dateRange) : [];
+        // Courier Rankings (read-only) - allow null branchId for owner viewing all branches
+        $courierRankings = $this->getCourierRankings($branchId, $dateRange);
 
-        // Late Delivery Reasons
-        $lateReasons = $branchId ? $this->getLateDeliveryReasons($branchId, $dateRange) : [];
+        // Late Delivery Reasons - allow null branchId for owner viewing all branches
+        $lateReasons = $this->getLateDeliveryReasons($branchId, $dateRange);
 
         return view('admin.performance.manager-dashboard', compact(
             'slaMetrics',
             'courierRankings',
             'lateReasons',
             'periodType',
-            'periodDate'
+            'periodDate',
+            'branchId'
         ));
     }
 
@@ -215,21 +216,36 @@ class PerformanceController extends Controller
 
         $rankings = [];
         foreach ($couriers as $courier) {
-            $snapshot = CourierPerformanceSnapshot::where('courier_id', $courier->id)
-                ->where('period_type', 'weekly')
-                ->where('period_date', $start->format('Y-m-d'))
-                ->first();
+            // Calculate metrics on the fly for the date range
+            $metrics = $this->calculateCourierMetrics($courier, $dateRange);
+            
+            // Get on-time and late counts from shipments with SLA
+            $shipmentsQuery = Shipment::where('courier_id', $courier->id)
+                ->whereBetween('created_at', [$start, $end])
+                ->whereHas('shipmentSla');
+            
+            $onTime = (clone $shipmentsQuery)->whereHas('shipmentSla', function($q) {
+                $q->where('status', 'on_time');
+            })->count();
+            
+            $late = (clone $shipmentsQuery)->whereHas('shipmentSla', function($q) {
+                $q->where('status', 'late');
+            })->count();
+            
+            $total = $shipmentsQuery->count();
+            $slaRate = $total > 0 ? round(($onTime / $total) * 100, 2) : 0;
 
-            if ($snapshot) {
-                $rankings[] = [
-                    'courier' => $courier,
-                    'metrics' => $snapshot->metrics,
-                ];
-            }
+            $rankings[] = [
+                'courier_name' => $courier->name,
+                'total' => $total,
+                'on_time' => $onTime,
+                'late' => $late,
+                'sla_rate' => $slaRate,
+            ];
         }
 
-        // Sort by on_time_percentage descending
-        usort($rankings, fn($a, $b) => $b['metrics']['on_time_percentage'] <=> $a['metrics']['on_time_percentage']);
+        // Sort by sla_rate descending
+        usort($rankings, fn($a, $b) => $b['sla_rate'] <=> $a['sla_rate']);
 
         return $rankings;
     }

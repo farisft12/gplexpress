@@ -45,7 +45,7 @@ class CourierManifest extends Model
      */
     public function shipments()
     {
-        return $this->belongsToMany(Shipment::class, 'courier_manifest_shipments')
+        return $this->belongsToMany(Shipment::class, 'courier_manifest_shipments', 'manifest_id', 'shipment_id')
                     ->withTimestamps();
     }
 

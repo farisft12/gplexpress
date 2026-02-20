@@ -11,6 +11,8 @@ use App\Services\Shipment\ShipmentService;
 use App\Services\Shipment\ShipmentQueryService;
 use App\Services\Shipment\ShipmentStatusService;
 use App\Services\Shipment\ShipmentAssignmentService;
+use App\Services\Shipment\CodAssignmentService;
+use App\Services\Shipment\DestinationCourierAssignmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -20,17 +22,23 @@ class ShipmentController extends Controller
     protected ShipmentQueryService $queryService;
     protected ShipmentStatusService $statusService;
     protected ShipmentAssignmentService $assignmentService;
+    protected CodAssignmentService $codAssignmentService;
+    protected DestinationCourierAssignmentService $destinationCourierAssignmentService;
 
     public function __construct(
         ShipmentService $shipmentService,
         ShipmentQueryService $queryService,
         ShipmentStatusService $statusService,
-        ShipmentAssignmentService $assignmentService
+        ShipmentAssignmentService $assignmentService,
+        CodAssignmentService $codAssignmentService,
+        DestinationCourierAssignmentService $destinationCourierAssignmentService
     ) {
         $this->shipmentService = $shipmentService;
         $this->queryService = $queryService;
         $this->statusService = $statusService;
         $this->assignmentService = $assignmentService;
+        $this->codAssignmentService = $codAssignmentService;
+        $this->destinationCourierAssignmentService = $destinationCourierAssignmentService;
     }
 
     /**
@@ -225,6 +233,138 @@ class ShipmentController extends Controller
     }
 
     /**
+     * Show form to assign COD shipments to courier
+     */
+    public function assignCodForm()
+    {
+        $user = auth()->user();
+        
+        // Only admin/manager from destination branch can assign COD
+        if (!$user->isAdmin() && !$user->isManager() && !$user->isOwner()) {
+            abort(403);
+        }
+
+        // Get COD shipments that can be assigned (status: sampai_di_cabang_tujuan, type: cod, cod_status: belum_lunas)
+        $query = Shipment::where('status', 'sampai_di_cabang_tujuan')
+            ->where('type', 'cod')
+            ->where('cod_status', 'belum_lunas')
+            ->whereNull('cod_collected_by');
+
+        // Filter by destination branch
+        if ($user->isAdmin() || $user->isManager()) {
+            if ($user->branch_id) {
+                $query->where('destination_branch_id', $user->branch_id);
+            }
+        }
+
+        $codShipments = $query->with(['originBranch', 'destinationBranch'])
+            ->latest()
+            ->get();
+
+        // Get couriers from destination branch
+        $courierQuery = User::whereIn('role', ['kurir', 'courier_cabang'])
+            ->where('status', 'active');
+
+        if ($user->isAdmin() || $user->isManager()) {
+            if ($user->branch_id) {
+                $courierQuery->where('branch_id', $user->branch_id);
+            }
+        }
+
+        $couriers = $courierQuery->orderBy('name')->get();
+
+        return view('admin.shipments.assign-cod', compact('codShipments', 'couriers'));
+    }
+
+    /**
+     * Assign COD shipments to courier
+     */
+    public function assignCod(\App\Http\Requests\AssignCodRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+            $courier = User::findOrFail($validated['courier_id']);
+            
+            $this->codAssignmentService->assignCodShipments(
+                $validated['shipment_ids'],
+                $courier,
+                auth()->user()
+            );
+
+            return redirect()->route('admin.shipments.index')
+                ->with('success', 'Paket COD berhasil di-assign ke kurir untuk penagihan.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
+        }
+    }
+
+    /**
+     * Show form to assign shipments to destination courier
+     */
+    public function assignDestinationCourierForm()
+    {
+        $user = auth()->user();
+        
+        // Only admin/manager from destination branch can assign
+        if (!$user->isAdmin() && !$user->isManager() && !$user->isOwner()) {
+            abort(403);
+        }
+
+        // Get shipments that can be assigned (status: sampai_di_cabang_tujuan)
+        // Disable BranchScope to allow access from destination branch
+        $query = Shipment::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
+            ->where('status', 'sampai_di_cabang_tujuan')
+            ->whereNull('destination_courier_id');
+
+        // Filter by destination branch
+        if ($user->isAdmin() || $user->isManager()) {
+            if ($user->branch_id) {
+                $query->where('destination_branch_id', $user->branch_id);
+            }
+        }
+
+        $shipments = $query->with(['originBranch', 'destinationBranch', 'courier'])
+            ->latest()
+            ->get();
+
+        // Get couriers from destination branch
+        $courierQuery = User::whereIn('role', ['kurir', 'courier_cabang'])
+            ->where('status', 'active');
+
+        if ($user->isAdmin() || $user->isManager()) {
+            if ($user->branch_id) {
+                $courierQuery->where('branch_id', $user->branch_id);
+            }
+        }
+
+        $couriers = $courierQuery->orderBy('name')->get();
+
+        return view('admin.shipments.assign-destination-courier', compact('shipments', 'couriers'));
+    }
+
+    /**
+     * Assign shipments to destination courier
+     */
+    public function assignDestinationCourier(\App\Http\Requests\AssignDestinationCourierRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+            $courier = User::findOrFail($validated['courier_id']);
+            
+            $this->destinationCourierAssignmentService->assignToDestinationCourier(
+                $validated['shipment_ids'],
+                $courier,
+                auth()->user()
+            );
+
+            return redirect()->route('admin.shipments.index')
+                ->with('success', 'Paket berhasil di-assign ke kurir tujuan untuk pengantaran.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
+        }
+    }
+
+    /**
      * Show edit status form
      */
     public function editStatus($shipmentId)
@@ -285,7 +425,7 @@ class ShipmentController extends Controller
     /**
      * Send notification to receiver
      */
-    public function sendNotification($shipmentId)
+    public function sendNotification(Request $request, $shipmentId)
     {
         // Convert to integer if it's a string
         $id = is_numeric($shipmentId) ? (int) $shipmentId : $shipmentId;

@@ -97,6 +97,7 @@ class ManagerDashboardController extends Controller
 
         $dateFrom = $request->get('date_from', now()->startOfMonth()->format('Y-m-d'));
         $dateTo = $request->get('date_to', now()->format('Y-m-d'));
+        $period = $request->get('period', 'bulanan'); // harian, mingguan, bulanan, tahunan
 
         // Paket Keluar (dari cabang ini)
         $paketKeluar = Shipment::where('origin_branch_id', $branchId)
@@ -112,6 +113,83 @@ class ManagerDashboardController extends Controller
             ->latest()
             ->paginate(20, ['*'], 'masuk');
 
+        // Revenue calculation helper
+        $calculateRevenue = function($query) {
+            return $query->selectRaw('
+                COALESCE(SUM(
+                    CASE 
+                        WHEN type = \'cod\' THEN 
+                            cod_amount + COALESCE(cod_shipping_cost, 0) + COALESCE(cod_admin_fee, 0)
+                        ELSE 
+                            COALESCE(shipping_cost, 0)
+                    END
+                ), 0) as total
+            ')->value('total') ?? 0;
+        };
+
+        // Calculate revenue based on selected period
+        $revenueData = [];
+        $periodStart = null;
+        
+        switch ($period) {
+            case 'harian':
+                $periodStart = Carbon::parse($dateFrom)->startOfDay();
+                $periodEnd = Carbon::parse($dateTo)->endOfDay();
+                $revenueData = [
+                    'revenue_keluar' => $calculateRevenue(
+                        Shipment::where('origin_branch_id', $branchId)
+                            ->whereBetween('created_at', [$periodStart, $periodEnd])
+                    ),
+                    'revenue_masuk' => $calculateRevenue(
+                        Shipment::where('destination_branch_id', $branchId)
+                            ->whereBetween('created_at', [$periodStart, $periodEnd])
+                    ),
+                ];
+                break;
+                
+            case 'mingguan':
+                $periodStart = Carbon::now()->startOfWeek();
+                $revenueData = [
+                    'revenue_keluar' => $calculateRevenue(
+                        Shipment::where('origin_branch_id', $branchId)
+                            ->where('created_at', '>=', $periodStart)
+                    ),
+                    'revenue_masuk' => $calculateRevenue(
+                        Shipment::where('destination_branch_id', $branchId)
+                            ->where('created_at', '>=', $periodStart)
+                    ),
+                ];
+                break;
+                
+            case 'bulanan':
+                $periodStart = Carbon::now()->startOfMonth();
+                $revenueData = [
+                    'revenue_keluar' => $calculateRevenue(
+                        Shipment::where('origin_branch_id', $branchId)
+                            ->where('created_at', '>=', $periodStart)
+                    ),
+                    'revenue_masuk' => $calculateRevenue(
+                        Shipment::where('destination_branch_id', $branchId)
+                            ->where('created_at', '>=', $periodStart)
+                    ),
+                ];
+                break;
+                
+            case 'tahunan':
+                $periodStart = Carbon::now()->startOfYear();
+                $revenueData = [
+                    'revenue_keluar' => $calculateRevenue(
+                        Shipment::where('origin_branch_id', $branchId)
+                            ->where('created_at', '>=', $periodStart)
+                    ),
+                    'revenue_masuk' => $calculateRevenue(
+                        Shipment::where('destination_branch_id', $branchId)
+                            ->where('created_at', '>=', $periodStart)
+                    ),
+                ];
+                break;
+        }
+
         // Summary
         $summary = [
             'total_keluar' => Shipment::where('origin_branch_id', $branchId)
@@ -123,7 +201,6 @@ class ManagerDashboardController extends Controller
             'cod_keluar' => Shipment::where('origin_branch_id', $branchId)
                 ->where('type', 'cod')
                 ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
-
                 ->selectRaw('SUM(cod_amount + COALESCE(cod_shipping_cost,0) + COALESCE(cod_admin_fee,0)) as total')
                 ->value('total') ?? 0,
             'cod_masuk' => Shipment::where('destination_branch_id', $branchId)
@@ -131,7 +208,6 @@ class ManagerDashboardController extends Controller
                 ->whereBetween('created_at', [$dateFrom, $dateTo . ' 23:59:59'])
                 ->selectRaw('SUM(cod_amount + COALESCE(cod_shipping_cost,0) + COALESCE(cod_admin_fee,0)) as total')
                 ->value('total') ?? 0,
-
         ];
 
         $branches = $user->isOwner() ? \App\Models\Branch::where('status', 'active')->get() : collect();
@@ -141,6 +217,8 @@ class ManagerDashboardController extends Controller
             'paketKeluar',
             'paketMasuk',
             'summary',
+            'revenueData',
+            'period',
             'branchId',
             'dateFrom',
             'dateTo',

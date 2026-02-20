@@ -3,11 +3,13 @@
 namespace App\Providers;
 
 use App\Models\CourierSettlement;
+use App\Models\OperationalCost;
 use App\Models\Zone;
 use App\Models\User;
 use App\Models\Branch;
 use App\Models\PricingTable;
 use App\Policies\SettlementPolicy;
+use App\Policies\OperationalCostPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\ZonePolicy;
 use App\Policies\BranchPolicy;
@@ -24,6 +26,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         User::class => UserPolicy::class,
         CourierSettlement::class => SettlementPolicy::class,
+        OperationalCost::class => OperationalCostPolicy::class,
         Zone::class => ZonePolicy::class,
         Branch::class => BranchPolicy::class,
         PricingTable::class => PricingTablePolicy::class,

@@ -22,10 +22,8 @@ class SettlementPolicy
             return true;
         }
         
-        // Admin can view their branch settlements (read-only)
-        if ($user->isAdmin() && $user->branch_id) {
-            return true;
-        }
+        // Admin CANNOT access finance dashboard
+        // Removed admin access as per requirement
         
         return false;
     }

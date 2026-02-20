@@ -113,11 +113,15 @@ Route::middleware('guest')->group(function () {
     // Manager Dashboard
     Route::get('/manager/dashboard', [ManagerDashboardController::class, 'index'])->name('manager.dashboard');
     
-    // Admin & Owner routes (shared)
-    Route::middleware('admin_or_owner')->prefix('admin')->name('admin.')->group(function () {
+    // Admin routes (Owner cannot access shipments)
+    Route::middleware(['auth', 'active', 'admin'])->prefix('admin')->name('admin.')->group(function () {
         // Custom routes must be defined before resource routes to avoid conflicts
         Route::get('shipments/assign/form', [ShipmentController::class, 'assignForm'])->name('shipments.assign.form');
         Route::post('shipments/assign', [ShipmentController::class, 'assign'])->name('shipments.assign');
+        Route::get('shipments/cod/assign/form', [ShipmentController::class, 'assignCodForm'])->name('shipments.cod.assign.form');
+        Route::post('shipments/cod/assign', [ShipmentController::class, 'assignCod'])->name('shipments.cod.assign');
+        Route::get('shipments/destination-courier/assign/form', [ShipmentController::class, 'assignDestinationCourierForm'])->name('shipments.destination-courier.assign.form');
+        Route::post('shipments/destination-courier/assign', [ShipmentController::class, 'assignDestinationCourier'])->name('shipments.destination-courier.assign');
         Route::get('shipments/pricing/get', [ShipmentController::class, 'getPricing'])->name('shipments.pricing.get');
         Route::post('shipments/{shipmentId}/send-notification', [ShipmentController::class, 'sendNotification'])->name('shipments.send-notification');
         
@@ -138,17 +142,18 @@ Route::middleware('guest')->group(function () {
             Route::get('/', [\App\Http\Controllers\PaymentController::class, 'listPayments'])->name('index');
             Route::get('/failed', [\App\Http\Controllers\PaymentController::class, 'listFailedPayments'])->name('failed');
         });
+    });
+    
+    // Admin & Owner routes (shared - except shipments)
+    Route::middleware('admin_or_owner')->prefix('admin')->name('admin.')->group(function () {
         
         // Management Data
         Route::resource('branches', BranchController::class);
         Route::get('branches/{branch}/users', [BranchController::class, 'show'])->name('branches.users');
         Route::post('branches/{branch}/assign-users', [BranchController::class, 'assignUsers'])->name('branches.assign-users');
         Route::delete('branches/{branch}/users/{user}', [BranchController::class, 'removeUser'])->name('branches.remove-user');
-        Route::resource('kurirs', KurirController::class);
         Route::resource('pricing', PricingController::class);
         Route::resource('expeditions', ExpeditionController::class)->except(['show']);
-        // User Management (Owner can CRUD, Manager can only view)
-        Route::get('users', [UserManagementController::class, 'index'])->name('users.index');
         
         // User Management CRUD (Owner only) - must be before {user} route to avoid conflict
         Route::middleware('owner')->group(function () {
@@ -183,6 +188,10 @@ Route::middleware('guest')->group(function () {
             Route::post('/settlements', [FinanceController::class, 'storeSettlement'])->name('settlements.store');
             Route::get('/settlements/{settlement}', [FinanceController::class, 'showSettlement'])->name('settlements.show');
             Route::post('/settlements/{settlement}/confirm', [FinanceController::class, 'confirmSettlement'])->name('settlements.confirm');
+            Route::get('/operational-costs/create', [FinanceController::class, 'createOperationalCost'])->name('operational-costs.create');
+            Route::post('/operational-costs', [FinanceController::class, 'storeOperationalCost'])->name('operational-costs.store');
+            Route::get('/operational-costs/{operationalCost}/edit', [FinanceController::class, 'editOperationalCost'])->name('operational-costs.edit');
+            Route::put('/operational-costs/{operationalCost}', [FinanceController::class, 'updateOperationalCost'])->name('operational-costs.update');
         });
         
         // Performance Dashboards
@@ -199,6 +208,22 @@ Route::middleware('guest')->group(function () {
             Route::get('/{notificationTemplate}/edit', [\App\Http\Controllers\NotificationTemplateController::class, 'edit'])->name('edit');
             Route::put('/{notificationTemplate}', [\App\Http\Controllers\NotificationTemplateController::class, 'update'])->name('update');
             Route::delete('/{notificationTemplate}', [\App\Http\Controllers\NotificationTemplateController::class, 'destroy'])->name('destroy');
+        });
+    });
+    
+    // Routes accessible by Admin, Owner, and Manager
+    Route::middleware(['auth', 'active'])->prefix('admin')->name('admin.')->group(function () {
+        // User Management (Owner can CRUD, Manager and Admin can only view)
+        Route::get('users', [UserManagementController::class, 'index'])->name('users.index');
+        
+        // Kurir Management (Owner and Admin can CRUD, Manager can only view)
+        Route::get('kurirs', [KurirController::class, 'index'])->name('kurirs.index');
+        Route::middleware('admin_or_owner')->group(function () {
+            Route::get('kurirs/create', [KurirController::class, 'create'])->name('kurirs.create');
+            Route::post('kurirs', [KurirController::class, 'store'])->name('kurirs.store');
+            Route::get('kurirs/{kurir}/edit', [KurirController::class, 'edit'])->name('kurirs.edit');
+            Route::put('kurirs/{kurir}', [KurirController::class, 'update'])->name('kurirs.update');
+            Route::delete('kurirs/{kurir}', [KurirController::class, 'destroy'])->name('kurirs.destroy');
         });
     });
     
@@ -237,6 +262,8 @@ Route::middleware('guest')->group(function () {
     Route::middleware('kurir')->prefix('courier')->name('courier.')->group(function () {
         Route::get('/dashboard', [CourierController::class, 'dashboard'])->name('dashboard');
         Route::get('/performance', [PerformanceController::class, 'courierDashboard'])->name('performance');
+        Route::get('/cod/dashboard', [CourierController::class, 'codDashboard'])->name('cod.dashboard');
+        Route::post('/shipments/{shipment}/cod/payment', [CourierController::class, 'inputCodPayment'])->name('shipments.cod.payment');
         Route::post('/shipments/{shipment}/update-status', [CourierController::class, 'updateStatus'])->name('shipments.update-status');
         Route::get('/shipments', [CourierController::class, 'getShipments'])->name('shipments.list');
         

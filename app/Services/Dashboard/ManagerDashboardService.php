@@ -125,15 +125,20 @@ class ManagerDashboardService
             ->selectRaw('
                 COUNT(*) as total_delivered,
                 COUNT(CASE WHEN EXISTS (
-                    SELECT 1 FROM shipment_slas 
-                    WHERE shipment_slas.shipment_id = shipments.id 
-                    AND shipment_slas.status = \'on_time\'
+                    SELECT 1 FROM shipment_sla 
+                    WHERE shipment_sla.shipment_id = shipments.id 
+                    AND shipment_sla.status = \'on_time\'
                 ) THEN 1 END) as on_time,
                 COUNT(CASE WHEN EXISTS (
-                    SELECT 1 FROM shipment_slas 
-                    WHERE shipment_slas.shipment_id = shipments.id 
-                    AND shipment_slas.status = \'late\'
-                ) THEN 1 END) as late
+                    SELECT 1 FROM shipment_sla 
+                    WHERE shipment_sla.shipment_id = shipments.id 
+                    AND shipment_sla.status = \'late\'
+                ) THEN 1 END) as late,
+                COUNT(CASE WHEN EXISTS (
+                    SELECT 1 FROM shipment_sla 
+                    WHERE shipment_sla.shipment_id = shipments.id 
+                    AND shipment_sla.status = \'failed\'
+                ) THEN 1 END) as failed
             ')
             ->first();
 
@@ -143,6 +148,7 @@ class ManagerDashboardService
             'total_delivered' => $total,
             'on_time' => $stats->on_time ?? 0,
             'late' => $stats->late ?? 0,
+            'failed' => $stats->failed ?? 0,
             'on_time_percentage' => $total > 0 ? round((($stats->on_time ?? 0) / $total) * 100, 2) : 0,
             'late_percentage' => $total > 0 ? round((($stats->late ?? 0) / $total) * 100, 2) : 0,
         ];

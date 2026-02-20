@@ -169,7 +169,7 @@ class PaymentController extends Controller
             if ($user->branch_id) {
                 // Check if user is from origin branch or destination branch
                 if ($shipment->branch_id !== $user->branch_id && $shipment->destination_branch_id !== $user->branch_id) {
-                    if ($request->expectsJson() || $request->ajax()) {
+                    if ($request->expectsJson() || $request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
                         return response()->json([
                             'success' => false,
                             'message' => 'Anda tidak memiliki akses untuk memproses pembayaran paket ini.'
@@ -199,7 +199,7 @@ class PaymentController extends Controller
             ]);
 
             // Return JSON response for AJAX requests
-            if ($request->expectsJson() || $request->ajax()) {
+            if ($request->expectsJson() || $request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
                 return response()->json([
                     'success' => true,
                     'message' => 'Pembayaran Cash berhasil diproses. Status paket diubah menjadi Diterima.'
@@ -216,14 +216,13 @@ class PaymentController extends Controller
             ]);
             
             // Return JSON response for AJAX requests
-            if ($request->expectsJson() || $request->ajax()) {
+            if ($request->expectsJson() || $request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage()
                 ], 400);
             }
             
-
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
