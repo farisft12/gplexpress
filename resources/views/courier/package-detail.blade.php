@@ -36,11 +36,9 @@
                     @if($shipment->cod_status === 'belum_lunas')
                         <div>
                             <span class="text-sm text-gray-600">Nilai COD:</span>
-<<<<<<< HEAD
+
                             <span class="ml-2 font-medium text-gray-900">Rp {{ number_format($shipment->total_cod_collectible, 0, ',', '.') }}</span>
-=======
-                            <span class="ml-2 font-medium text-gray-900">Rp {{ number_format($shipment->cod_amount, 0, ',', '.') }}</span>
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
                         </div>
                     @endif
                 @endif
@@ -53,11 +51,9 @@
             <div class="space-y-2 text-sm">
                 <div><span class="text-gray-600">Tipe:</span> <span class="font-medium">{{ $shipment->type === 'cod' ? 'COD' : 'Non-COD' }}</span></div>
                 @if($shipment->isCOD())
-<<<<<<< HEAD
+
                     <div><span class="text-gray-600">Nilai COD:</span> <span class="font-medium">Rp {{ number_format($shipment->total_cod_collectible, 0, ',', '.') }}</span></div>
-=======
-                    <div><span class="text-gray-600">Nilai COD:</span> <span class="font-medium">Rp {{ number_format($shipment->cod_amount, 0, ',', '.') }}</span></div>
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
                     @if($shipment->payment_method)
                         <div><span class="text-gray-600">Metode Bayar:</span> <span class="font-medium">{{ strtoupper($shipment->payment_method) }}</span></div>
                     @endif
@@ -81,15 +77,13 @@
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Pengirim</h3>
             <div class="space-y-2">
                 <div><span class="text-sm text-gray-600">Nama:</span> <span class="font-medium">{{ $shipment->sender_name }}</span></div>
-<<<<<<< HEAD
+
                 @if($shipment->sender_phone)
                     <div><span class="text-sm text-gray-600">HP:</span> <span class="font-medium">{{ $shipment->sender_phone }}</span></div>
                 @elseif($shipment->external_resi_number)
                     <div><span class="text-sm text-gray-600">Resi Ekspedisi:</span> <span class="font-medium">{{ $shipment->external_resi_number }}</span></div>
                 @endif
-=======
-                <div><span class="text-sm text-gray-600">HP:</span> <span class="font-medium">{{ $shipment->sender_phone }}</span></div>
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
                 <div><span class="text-sm text-gray-600">Alamat:</span> <p class="font-medium mt-1">{{ $shipment->sender_address }}</p></div>
             </div>
         </div>

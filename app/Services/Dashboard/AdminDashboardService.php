@@ -27,11 +27,7 @@ class AdminDashboardService
         $stats = $baseQuery
             ->selectRaw('
                 COUNT(CASE WHEN DATE(created_at) = ? THEN 1 END) as total_paket_hari_ini,
-<<<<<<< HEAD
                 COALESCE(SUM(CASE WHEN DATE(created_at) = ? AND type = \'cod\' THEN (cod_amount + COALESCE(cod_shipping_cost,0) + COALESCE(cod_admin_fee,0)) END), 0) as total_cod_hari_ini,
-=======
-                COALESCE(SUM(CASE WHEN DATE(created_at) = ? AND type = \'cod\' THEN cod_amount END), 0) as total_cod_hari_ini,
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                 COUNT(CASE WHEN status IN (\'diproses\', \'dalam_pengiriman\') THEN 1 END) as paket_dalam_pengantaran,
                 COUNT(CASE WHEN status = \'gagal\' AND DATE(created_at) = ? THEN 1 END) as paket_gagal
             ', [$today->format('Y-m-d'), $today->format('Y-m-d'), $today->format('Y-m-d')])

@@ -63,20 +63,12 @@ class PaymentTransactionObserver
                             'courier_id' => $shipment->courier_id,
                             'shipment_id' => $shipment->id,
                             'type' => 'cod_collected',
-<<<<<<< HEAD
                             'amount' => $shipment->total_cod_collectible,
-=======
-                            'amount' => $shipment->cod_amount,
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                             'notes' => 'COD collected via ' . ($paymentTransaction->payment_method ?? 'qris'),
                         ]);
 
                         // Update current balance
-<<<<<<< HEAD
                         CourierCurrentBalance::updateBalance($shipment->courier_id, $shipment->total_cod_collectible, 'add');
-=======
-                        CourierCurrentBalance::updateBalance($shipment->courier_id, $shipment->cod_amount, 'add');
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                     }
 
                     // Mark transaction as processed

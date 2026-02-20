@@ -17,10 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-<<<<<<< HEAD
             ExpeditionSeeder::class,
-=======
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         ]);
     }
 }

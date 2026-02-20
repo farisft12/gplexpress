@@ -16,10 +16,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserPackageController;
 use App\Http\Controllers\ZoneController;
 use App\Http\Controllers\CourierZoneController;
-<<<<<<< HEAD
 use App\Http\Controllers\ExpeditionController;
-=======
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
 use App\Http\Controllers\ManagerDashboardController;
 use App\Http\Controllers\OwnerController;
 use Illuminate\Support\Facades\Route;
@@ -29,7 +26,6 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-<<<<<<< HEAD
 // Public tracking (with rate limiting - relaxed in non-production)
 if (app()->environment('production')) {
     Route::middleware('throttle:10,1')->group(function () {
@@ -40,13 +36,6 @@ if (app()->environment('production')) {
     Route::get('/track', [TrackingController::class, 'index'])->name('tracking.index');
     Route::post('/track', [TrackingController::class, 'track'])->name('tracking.track');
 }
-=======
-// Public tracking (with rate limiting)
-Route::middleware('throttle:10,1')->group(function () {
-    Route::get('/track', [TrackingController::class, 'index'])->name('tracking.index');
-    Route::post('/track', [TrackingController::class, 'track'])->name('tracking.track');
-});
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
 
 // Public API (read-only, API key required)
 Route::prefix('api/v1')->middleware([\App\Http\Middleware\AuthenticateApiKey::class])->group(function () {
@@ -69,7 +58,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
 // Auth routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-<<<<<<< HEAD
     
     if (app()->environment('production')) {
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
@@ -84,19 +72,12 @@ Route::middleware('guest')->group(function () {
     } else {
         Route::post('/register', [AuthController::class, 'register']);
     }
-
-=======
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
-    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     Route::get('/register/verify', [AuthController::class, 'showVerifyForm'])->name('register.verify');
     Route::post('/register/verify', [AuthController::class, 'verify'])->name('register.verify.submit');
     Route::post('/register/resend-verification', [AuthController::class, 'resendVerificationCode'])->name('register.resend-verification');
     
     // Password Reset Routes
     Route::get('/password/forgot', [\App\Http\Controllers\PasswordResetController::class, 'showForgotPasswordForm'])->name('password.forgot');
-<<<<<<< HEAD
 
     if (app()->environment('production')) {
         Route::post('/password/email', [\App\Http\Controllers\PasswordResetController::class, 'sendResetLink'])
@@ -106,9 +87,6 @@ Route::middleware('guest')->group(function () {
         Route::post('/password/email', [\App\Http\Controllers\PasswordResetController::class, 'sendResetLink'])
             ->name('password.email');
     }
-=======
-    Route::post('/password/email', [\App\Http\Controllers\PasswordResetController::class, 'sendResetLink'])->middleware('throttle:3,60')->name('password.email');
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     Route::get('/password/reset-code', [\App\Http\Controllers\PasswordResetController::class, 'showResetCodeForm'])->name('password.reset.code');
     Route::post('/password/verify-code', [\App\Http\Controllers\PasswordResetController::class, 'verifyResetCode'])->name('password.verify.code');
     Route::get('/password/reset/{token?}', [\App\Http\Controllers\PasswordResetController::class, 'showResetForm'])->name('password.reset');
@@ -137,7 +115,6 @@ Route::middleware('guest')->group(function () {
     
     // Admin & Owner routes (shared)
     Route::middleware('admin_or_owner')->prefix('admin')->name('admin.')->group(function () {
-<<<<<<< HEAD
         // Custom routes must be defined before resource routes to avoid conflicts
         Route::get('shipments/assign/form', [ShipmentController::class, 'assignForm'])->name('shipments.assign.form');
         Route::post('shipments/assign', [ShipmentController::class, 'assign'])->name('shipments.assign');
@@ -148,15 +125,6 @@ Route::middleware('guest')->group(function () {
         Route::get('shipments/{shipmentId}/edit-status', [ShipmentController::class, 'editStatus'])->name('shipments.edit-status');
         Route::post('shipments/{shipmentId}/update-status', [ShipmentController::class, 'updateStatus'])->name('shipments.update-status');
         Route::get('shipments/{shipmentId}/print', [ShipmentController::class, 'printResi'])->name('shipments.print');
-=======
-        Route::resource('shipments', ShipmentController::class);
-        Route::get('shipments/assign/form', [ShipmentController::class, 'assignForm'])->name('shipments.assign.form');
-        Route::post('shipments/assign', [ShipmentController::class, 'assign'])->name('shipments.assign');
-        Route::get('shipments/{shipment}/edit-status', [ShipmentController::class, 'editStatus'])->name('shipments.edit-status');
-        Route::post('shipments/{shipment}/update-status', [ShipmentController::class, 'updateStatus'])->name('shipments.update-status');
-        Route::get('shipments/pricing/get', [ShipmentController::class, 'getPricing'])->name('shipments.pricing.get');
-        Route::get('shipments/{shipment}/print', [ShipmentController::class, 'printResi'])->name('shipments.print');
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         
         // Payment routes
         Route::post('shipments/{shipment}/payment/cash', [\App\Http\Controllers\PaymentController::class, 'processCashPayment'])->name('shipments.payment.cash');
@@ -178,12 +146,7 @@ Route::middleware('guest')->group(function () {
         Route::delete('branches/{branch}/users/{user}', [BranchController::class, 'removeUser'])->name('branches.remove-user');
         Route::resource('kurirs', KurirController::class);
         Route::resource('pricing', PricingController::class);
-<<<<<<< HEAD
         Route::resource('expeditions', ExpeditionController::class)->except(['show']);
-
-=======
-        
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         // User Management (Owner can CRUD, Manager can only view)
         Route::get('users', [UserManagementController::class, 'index'])->name('users.index');
         

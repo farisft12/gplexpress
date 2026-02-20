@@ -3,10 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-<<<<<<< HEAD
 use App\Models\Branch;
-=======
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -17,7 +14,6 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-<<<<<<< HEAD
         // Create Owner first (no branch_id needed)
         User::updateOrCreate(
             ['email' => 'owner@gmail.com'],
@@ -84,39 +80,5 @@ class UserSeeder extends Seeder
                 'branch_id' => $surabayaBranch->id,
             ]
         );
-=======
-        // Create Admin
-        User::create([
-            'name' => 'Admin GPL Expres',
-            'email' => 'admin@gplexpres.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'status' => 'active',
-        ]);
-
-        // Create Kurir
-        User::create([
-            'name' => 'Kurir Test',
-            'email' => 'kurir@gplexpres.com',
-            'password' => Hash::make('password'),
-            'role' => 'kurir',
-            'status' => 'active',
-        ]);
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     }
 }
-
-
-
-
-
-
-
-<<<<<<< HEAD
-
-
-
-
-
-=======
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573

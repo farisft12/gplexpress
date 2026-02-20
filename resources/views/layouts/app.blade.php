@@ -141,13 +141,12 @@
                                 <span class="w-2 h-2 bg-gray-400 rounded-full mr-3"></span>
                                 Tarif Harga
                             </a>
-<<<<<<< HEAD
+
                             <a href="{{ route('admin.expeditions.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
                                 <span class="w-2 h-2 bg-gray-400 rounded-full mr-3"></span>
                                 Ekspedisi
                             </a>
-=======
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
                         </div>
                     </div>
                     

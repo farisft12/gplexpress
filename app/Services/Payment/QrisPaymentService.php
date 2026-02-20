@@ -39,11 +39,9 @@ class QrisPaymentService
 
         // Prepare transaction data
         $orderId = 'GPL-' . $shipment->resi_number . '-' . time();
-<<<<<<< HEAD
+
         $grossAmount = (int) $shipment->total_cod_collectible;
-=======
-        $grossAmount = (int) $shipment->cod_amount;
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
         
         if ($grossAmount <= 0) {
             throw new \Exception('Jumlah pembayaran tidak valid.');

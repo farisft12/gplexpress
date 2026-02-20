@@ -117,15 +117,13 @@
                         <h3 class="text-sm font-semibold text-gray-900 mb-3">Pengirim</h3>
                         <div class="space-y-2 text-sm">
                             <p><span class="text-gray-600">Nama:</span> <span class="font-medium text-gray-900">{{ $shipment->sender_name }}</span></p>
-<<<<<<< HEAD
+
                             @if($shipment->sender_phone)
                                 <p><span class="text-gray-600">HP:</span> <a href="tel:{{ $shipment->sender_phone }}" class="font-medium text-blue-600">{{ $shipment->sender_phone }}</a></p>
                             @elseif($shipment->external_resi_number)
                                 <p><span class="text-gray-600">Resi Ekspedisi:</span> <span class="font-medium text-gray-900">{{ $shipment->external_resi_number }}</span></p>
                             @endif
-=======
-                            <p><span class="text-gray-600">HP:</span> <a href="tel:{{ $shipment->sender_phone }}" class="font-medium text-blue-600">{{ $shipment->sender_phone }}</a></p>
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
                             <p><span class="text-gray-600">Alamat:</span></p>
                             <p class="font-medium text-gray-900">{{ $shipment->sender_address }}</p>
                         </div>
@@ -148,11 +146,9 @@
                         <div class="flex justify-between items-center">
                             <div>
                                 <p class="text-xs text-gray-600 mb-1">Nilai COD</p>
-<<<<<<< HEAD
+
                                 <p class="text-lg font-semibold text-gray-900">Rp {{ number_format($shipment->total_cod_collectible, 0, ',', '.') }}</p>
-=======
-                                <p class="text-lg font-semibold text-gray-900">Rp {{ number_format($shipment->cod_amount, 0, ',', '.') }}</p>
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
                             </div>
                             <div>
                                 <p class="text-xs text-gray-600 mb-1">Status</p>

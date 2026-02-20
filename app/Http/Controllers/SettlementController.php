@@ -34,11 +34,9 @@ class SettlementController extends Controller
         $courierQuery = User::whereIn('role', ['kurir', 'courier_cabang'])
             ->where('status', 'active');
         
-<<<<<<< HEAD
+
         if (!auth()->user()->isOwner() && auth()->user()->branch_id) {
-=======
-        if (auth()->user()->role !== 'super_admin' && auth()->user()->branch_id) {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
             $courierQuery->where('branch_id', auth()->user()->branch_id);
         }
         
@@ -58,11 +56,9 @@ class SettlementController extends Controller
         $courierQuery = User::whereIn('role', ['kurir', 'courier_cabang'])
             ->where('status', 'active');
         
-<<<<<<< HEAD
+
         if (!auth()->user()->isOwner() && auth()->user()->branch_id) {
-=======
-        if (auth()->user()->role !== 'super_admin' && auth()->user()->branch_id) {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
             $courierQuery->where('branch_id', auth()->user()->branch_id);
         }
         

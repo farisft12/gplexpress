@@ -206,7 +206,6 @@
                     </div>
 
                     <form method="GET" action="{{ route('tracking.index') }}">
-<<<<<<< HEAD
                         <input type="hidden" name="from" value="home">
                         <div class="space-y-4">
                             @if ($errors->has('resi_number'))
@@ -223,9 +222,6 @@
                                 </div>
                             @endif
                             
-=======
-                        <div class="space-y-4">
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
                                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,11 +233,7 @@
                                     name="resi_number"
                                     value="{{ old('resi_number') }}"
                                     placeholder="Masukkan nomor resi (Contoh: GPL20240116123456)"
-<<<<<<< HEAD
                                     class="w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-[#F4C430] focus:border-[#F4C430] outline-none text-base sm:text-lg transition-all @error('resi_number') border-red-500 @else border-gray-200 @enderror"
-=======
-                                    class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#F4C430] focus:border-[#F4C430] outline-none text-base sm:text-lg transition-all"
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                                     required
                                 >
                             </div>

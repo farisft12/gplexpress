@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Shipment;
 use App\Models\User;
 use App\Models\Branch;
-<<<<<<< HEAD
 use App\Models\Expedition;
-=======
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
 use App\Models\PricingTable;
 use App\Services\Shipment\ShipmentService;
 use App\Services\Shipment\ShipmentQueryService;
@@ -60,14 +57,9 @@ class ShipmentController extends Controller
         $this->authorize('create', Shipment::class);
         
         $branches = $this->shipmentService->getBranchesForCreate(auth()->user());
-<<<<<<< HEAD
         $expeditions = Expedition::active()->orderBy('name')->get();
         
         return view('admin.shipments.create', array_merge($branches, ['expeditions' => $expeditions]));
-=======
-        
-        return view('admin.shipments.create', $branches);
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     }
 
     /**
@@ -88,7 +80,6 @@ class ShipmentController extends Controller
     /**
      * Show shipment detail
      */
-<<<<<<< HEAD
     public function show($shipmentId)
     {
         // Resolve shipment without BranchScope to allow access from destination branch
@@ -127,30 +118,18 @@ class ShipmentController extends Controller
         // Replace the collection to avoid duplicates in view
         $shipment->setRelation('statusHistories', $uniqueHistories);
         
-=======
-    public function show(Shipment $shipment)
-    {
-        $this->authorize('view', $shipment);
-        
-        $shipment->load(['courier', 'statusHistories.updater', 'originBranch', 'destinationBranch']);
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         return view('admin.shipments.show', compact('shipment'));
     }
 
     /**
      * Print resi with QR code
      */
-<<<<<<< HEAD
     public function printResi($shipmentId)
     {
         // Resolve shipment without BranchScope to allow access from destination branch
         $shipment = Shipment::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
             ->findOrFail($shipmentId);
         
-=======
-    public function printResi(Shipment $shipment)
-    {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         $this->authorize('view', $shipment);
         
         $shipment->load(['originBranch', 'destinationBranch', 'courier']);
@@ -160,7 +139,6 @@ class ShipmentController extends Controller
     /**
      * Show edit form
      */
-<<<<<<< HEAD
     public function edit($shipmentId)
     {
         // Resolve shipment without BranchScope to allow access from destination branch
@@ -175,25 +153,11 @@ class ShipmentController extends Controller
         $expeditions = Expedition::active()->orderBy('name')->get();
         $shipment->load(['originBranch', 'destinationBranch', 'expedition']);
         return view('admin.shipments.edit', compact('shipment', 'originBranches', 'destinationBranches', 'expeditions'));
-=======
-    public function edit(Shipment $shipment)
-    {
-        // Cache branches list as it doesn't change frequently
-        $branches = cache()->remember('active_branches', 3600, function () {
-            return Branch::where('status', 'active')
-                ->select('id', 'name', 'code')
-                ->orderBy('name')
-                ->get();
-        });
-        $shipment->load(['originBranch', 'destinationBranch']);
-        return view('admin.shipments.edit', compact('shipment', 'branches'));
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
     }
 
     /**
      * Update shipment
      */
-<<<<<<< HEAD
     public function update(\App\Http\Requests\UpdateShipmentRequest $request, $shipmentId)
     {
         // Resolve shipment without BranchScope to allow access from destination branch
@@ -202,10 +166,6 @@ class ShipmentController extends Controller
         
         $this->authorize('update', $shipment);
         
-=======
-    public function update(\App\Http\Requests\UpdateShipmentRequest $request, Shipment $shipment)
-    {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         try {
             $this->shipmentService->update($shipment, $request->validated(), auth()->user());
 
@@ -230,11 +190,7 @@ class ShipmentController extends Controller
             ->where('status', 'active')
             ->select('id', 'name', 'email', 'branch_id');
         
-<<<<<<< HEAD
         if (!$user->isOwner() && $user->branch_id) {
-=======
-        if ($user->role !== 'super_admin' && $user->branch_id) {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             $kurirQuery->where('branch_id', $user->branch_id);
         }
         
@@ -271,7 +227,6 @@ class ShipmentController extends Controller
     /**
      * Show edit status form
      */
-<<<<<<< HEAD
     public function editStatus($shipmentId)
     {
         // Resolve shipment without BranchScope to allow access from destination branch
@@ -280,10 +235,6 @@ class ShipmentController extends Controller
         
         $this->authorize('updateStatus', $shipment);
         
-=======
-    public function editStatus(Shipment $shipment)
-    {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         $shipment->load(['courier', 'statusHistories.updater']);
         return view('admin.shipments.edit-status', compact('shipment'));
     }
@@ -291,7 +242,6 @@ class ShipmentController extends Controller
     /**
      * Update shipment status
      */
-<<<<<<< HEAD
     public function updateStatus(\App\Http\Requests\UpdateShipmentStatusRequest $request, $shipmentId)
     {
         // Resolve shipment without BranchScope to allow access from destination branch
@@ -301,10 +251,6 @@ class ShipmentController extends Controller
         // Manually authorize since we bypassed route model binding
         $this->authorize('updateStatus', $shipment);
         
-=======
-    public function updateStatus(\App\Http\Requests\UpdateShipmentStatusRequest $request, Shipment $shipment)
-    {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         try {
             $this->statusService->updateStatus($shipment, $request->validated());
 
@@ -318,7 +264,6 @@ class ShipmentController extends Controller
     /**
      * Delete shipment
      */
-<<<<<<< HEAD
     public function destroy($shipmentId)
     {
         // Resolve shipment without BranchScope to allow access from destination branch
@@ -327,10 +272,6 @@ class ShipmentController extends Controller
         
         $this->authorize('delete', $shipment);
         
-=======
-    public function destroy(Shipment $shipment)
-    {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         try {
             $this->shipmentService->delete($shipment, auth()->user());
 
@@ -342,7 +283,6 @@ class ShipmentController extends Controller
     }
 
     /**
-<<<<<<< HEAD
      * Send notification to receiver
      */
     public function sendNotification($shipmentId)
@@ -499,8 +439,6 @@ class ShipmentController extends Controller
     }
 
     /**
-=======
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
      * Get pricing for origin and destination branch (API endpoint)
      */
     public function getPricing(Request $request)

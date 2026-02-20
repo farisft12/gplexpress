@@ -19,7 +19,6 @@
         // Only show tabs and counts for admin/manager with branch_id
         $showDirectionTabs = $user->branch_id && !$user->isOwner();
         if ($showDirectionTabs) {
-<<<<<<< HEAD
             // For outgoing: use BranchScope (filters by branch_id/origin)
             $outgoingCount = \App\Models\Shipment::where('origin_branch_id', $user->branch_id)->count();
             
@@ -28,10 +27,6 @@
             $incomingCount = \App\Models\Shipment::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
                 ->where('destination_branch_id', $user->branch_id)
                 ->count();
-=======
-            $outgoingCount = \App\Models\Shipment::where('origin_branch_id', $user->branch_id)->count();
-            $incomingCount = \App\Models\Shipment::where('destination_branch_id', $user->branch_id)->count();
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
         }
     @endphp
     @if($showDirectionTabs)
@@ -148,11 +143,7 @@
                     <div>
                         <p class="text-xs text-gray-500 mb-1">Pengirim</p>
                         <p class="text-sm font-medium text-gray-900">{{ $shipment->sender_name }}</p>
-<<<<<<< HEAD
                         <p class="text-xs text-gray-500">{{ $shipment->sender_phone ?? ($shipment->external_resi_number ? 'Resi: ' . $shipment->external_resi_number : '-') }}</p>
-=======
-                        <p class="text-xs text-gray-500">{{ $shipment->sender_phone }}</p>
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                     </div>
                     <div>
                         <p class="text-xs text-gray-500 mb-1">Penerima</p>
@@ -168,11 +159,7 @@
                             <span class="px-2 py-1 text-xs font-semibold rounded-full bg-[#F4C430]/10 text-[#F4C430]">
                                 COD
                             </span>
-<<<<<<< HEAD
                             <p class="text-xs text-gray-600 mt-1">Rp {{ number_format($shipment->total_cod_collectible, 0, ',', '.') }}</p>
-=======
-                            <p class="text-xs text-gray-600 mt-1">Rp {{ number_format($shipment->cod_amount, 0, ',', '.') }}</p>
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                         @else
                             <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700">
                                 Non-COD
@@ -210,7 +197,6 @@
                             Edit
                         </a>
                     @endif
-<<<<<<< HEAD
                     @if($shipment->status === 'sampai_di_cabang_tujuan')
                         <form method="POST" action="{{ route('admin.shipments.send-notification', ['shipmentId' => $shipment->id]) }}" class="inline">
                             @csrf
@@ -222,11 +208,7 @@
                         </form>
                     @endif
                     @if($shipment->type === 'cod' && $shipment->status === 'sampai_di_cabang_tujuan' && $shipment->cod_status === 'belum_lunas')
-                        <button onclick="openPaymentModal({{ $shipment->id }}, '{{ $shipment->resi_number }}', {{ $shipment->total_cod_collectible }})" 
-=======
-                    @if($shipment->type === 'cod' && $shipment->status === 'sampai_di_cabang_tujuan' && $shipment->cod_status === 'belum_lunas')
-                        <button onclick="openPaymentModal({{ $shipment->id }}, '{{ $shipment->resi_number }}', {{ $shipment->cod_amount }})" 
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+                        <button onclick="openPaymentModal({{ $shipment->id }}, '{{ $shipment->resi_number }}', {{ $shipment->total_cod_collectible }})"
                                 class="flex-1 min-w-[80px] px-3 py-2 bg-green-600 text-white rounded-lg text-xs font-medium text-center hover:bg-green-700 transition-colors">
                             Bayar
                         </button>
@@ -309,11 +291,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $shipment->sender_name }}</div>
-<<<<<<< HEAD
                                 <div class="text-xs text-gray-500">{{ $shipment->sender_phone ?? ($shipment->external_resi_number ? 'Resi: ' . $shipment->external_resi_number : '-') }}</div>
-=======
-                                <div class="text-xs text-gray-500">{{ $shipment->sender_phone }}</div>
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ $shipment->receiver_name }}</div>
@@ -324,11 +302,7 @@
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-[#F4C430]/10 text-[#F4C430]">
                                         COD
                                     </span>
-<<<<<<< HEAD
                                     <div class="text-xs text-gray-500 mt-1">Rp {{ number_format($shipment->total_cod_collectible, 0, ',', '.') }}</div>
-=======
-                                    <div class="text-xs text-gray-500 mt-1">Rp {{ number_format($shipment->cod_amount, 0, ',', '.') }}</div>
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                                 @else
                                     <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700">
                                         Non-COD
@@ -384,11 +358,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
                                         </svg>
                                     </a>
-<<<<<<< HEAD
-                                    <a href="{{ route('admin.shipments.edit-status', $shipment->id) }}" 
-=======
-                                    <a href="{{ route('admin.shipments.edit-status', $shipment) }}" 
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+                                    <a href="{{ route('admin.shipments.edit-status', $shipment->id) }}"
                                        class="p-2 text-purple-600 hover:text-purple-800 hover:bg-purple-50 rounded-lg transition-colors" 
                                        title="Edit Status">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -417,7 +387,6 @@
                                             </button>
                                         </form>
                                     @endif
-<<<<<<< HEAD
                                     @if($shipment->status === 'sampai_di_cabang_tujuan')
                                         <form method="POST" action="{{ route('admin.shipments.send-notification', ['shipmentId' => $shipment->id]) }}" class="inline">
                                             @csrf
@@ -432,11 +401,7 @@
                                         </form>
                                     @endif
                                     @if($shipment->type === 'cod' && $shipment->status === 'sampai_di_cabang_tujuan' && $shipment->cod_status === 'belum_lunas')
-                                        <button onclick="openPaymentModal({{ $shipment->id }}, '{{ $shipment->resi_number }}', {{ $shipment->total_cod_collectible }})" 
-=======
-                                    @if($shipment->type === 'cod' && $shipment->status === 'sampai_di_cabang_tujuan' && $shipment->cod_status === 'belum_lunas')
-                                        <button onclick="openPaymentModal({{ $shipment->id }}, '{{ $shipment->resi_number }}', {{ $shipment->cod_amount }})" 
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+                                        <button onclick="openPaymentModal({{ $shipment->id }}, '{{ $shipment->resi_number }}', {{ $shipment->total_cod_collectible }})"
                                                 class="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors" 
                                                 title="Bayar COD">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

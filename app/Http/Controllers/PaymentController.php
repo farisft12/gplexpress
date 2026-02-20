@@ -39,7 +39,7 @@ class PaymentController extends Controller
     /**
      * Show payment form for COD shipment
      */
-<<<<<<< HEAD
+
     public function showPaymentForm($shipment = null)
     {
         // Get shipment from route parameter (could be model instance or ID)
@@ -65,10 +65,7 @@ class PaymentController extends Controller
             }
         }
         
-=======
-    public function showPaymentForm(Shipment $shipment)
-    {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
         // Only allow payment for COD shipments that are at destination branch
         if ($shipment->type !== 'cod') {
             return back()->withErrors(['error' => 'Paket ini bukan paket COD.']);
@@ -88,17 +85,14 @@ class PaymentController extends Controller
     /**
      * Show payment detail view (Admin)
      */
-<<<<<<< HEAD
+
     public function showPaymentDetail($shipmentId)
     {
         // Resolve shipment without BranchScope to allow access from destination branch
         $shipment = \App\Models\Shipment::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
             ->findOrFail($shipmentId);
         
-=======
-    public function showPaymentDetail(Shipment $shipment)
-    {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
         $paymentTransaction = PaymentTransaction::where('shipment_id', $shipment->id)
             ->orderBy('created_at', 'desc')
             ->first();
@@ -154,7 +148,7 @@ class PaymentController extends Controller
     /**
      * Process Cash Payment
      */
-<<<<<<< HEAD
+
     public function processCashPayment(Request $request, $shipment = null)
     {
         // Get shipment from route parameter (could be model instance or ID)
@@ -229,16 +223,7 @@ class PaymentController extends Controller
                 ], 400);
             }
             
-=======
-    public function processCashPayment(Request $request, Shipment $shipment)
-    {
-        try {
-            $this->paymentService->processCashPayment($shipment);
 
-            return redirect()->route('admin.shipments.index')
-                ->with('success', 'Pembayaran Cash berhasil diproses. Status paket diubah menjadi Diterima.');
-        } catch (\Exception $e) {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
@@ -246,17 +231,14 @@ class PaymentController extends Controller
     /**
      * Create QRIS Payment via Midtrans
      */
-<<<<<<< HEAD
+
     public function createQrisPayment(Request $request, $shipmentId)
     {
         // Resolve shipment without BranchScope to allow access from destination branch
         $shipment = \App\Models\Shipment::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
             ->findOrFail($shipmentId);
         
-=======
-    public function createQrisPayment(Request $request, Shipment $shipment)
-    {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
         if ($shipment->type !== 'cod' || $shipment->status !== 'sampai_di_cabang_tujuan') {
             return response()->json([
                 'success' => false,
@@ -291,11 +273,9 @@ class PaymentController extends Controller
 
             // Prepare transaction data
             $orderId = 'GPL-' . $shipment->resi_number . '-' . time();
-<<<<<<< HEAD
+
             $grossAmount = (int) $shipment->total_cod_collectible;
-=======
-            $grossAmount = (int) $shipment->cod_amount;
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
             
             // Validate amount
             if ($grossAmount <= 0) {
@@ -528,7 +508,7 @@ class PaymentController extends Controller
      * Check QRIS Payment Status
      * SECURITY: Never trust frontend payment status - always verify with Midtrans
      */
-<<<<<<< HEAD
+
     public function checkPaymentStatus($shipment = null)
     {
         // Get shipment from route parameter (could be model instance or ID)
@@ -557,10 +537,7 @@ class PaymentController extends Controller
             }
         }
         
-=======
-    public function checkPaymentStatus(Shipment $shipment)
-    {
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
         // SECURITY: Verify shipment ownership/access
         if (!$shipment->payment_transaction_id) {
             return response()->json([
@@ -601,11 +578,9 @@ class PaymentController extends Controller
                     'order_id' => $status['order_id'] ?? null,
                     'status' => $transactionStatus,
                     'payment_method' => $shipment->payment_method,
-<<<<<<< HEAD
+
                     'gross_amount' => $status['gross_amount'] ?? $shipment->total_cod_collectible,
-=======
-                    'gross_amount' => $status['gross_amount'] ?? $shipment->cod_amount,
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
                     'fraud_status' => $fraudStatus,
                 ]
             );
@@ -737,14 +712,12 @@ class PaymentController extends Controller
             }
 
             $resiNumber = $orderParts[1];
-<<<<<<< HEAD
+
             // Payment callback needs to find shipment from any branch
             $shipment = Shipment::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)
                 ->where('resi_number', $resiNumber)
                 ->first();
-=======
-            $shipment = Shipment::where('resi_number', $resiNumber)->first();
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
 
             if (!$shipment) {
                 Log::error('Midtrans callback: Shipment not found', [
@@ -756,17 +729,12 @@ class PaymentController extends Controller
             }
 
             // Validate gross amount matches
-<<<<<<< HEAD
+
             if ((int)$grossAmount !== (int)$shipment->total_cod_collectible) {
                 Log::warning('Midtrans callback: Amount mismatch', [
                     'shipment_id' => $shipment->id,
                     'expected' => $shipment->total_cod_collectible,
-=======
-            if ((int)$grossAmount !== (int)$shipment->cod_amount) {
-                Log::warning('Midtrans callback: Amount mismatch', [
-                    'shipment_id' => $shipment->id,
-                    'expected' => $shipment->cod_amount,
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
                     'received' => $grossAmount,
                     'ip' => $callbackIp
                 ]);
@@ -797,11 +765,9 @@ class PaymentController extends Controller
      * Get QR Code Image from Midtrans URL (Proxy endpoint)
      * Returns image directly, not blob URL
      */
-<<<<<<< HEAD
+
     public function getQrCodeImage(Request $request, $shipmentId)
-=======
-    public function getQrCodeImage(Request $request, Shipment $shipment)
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
     {
         $qrCodeUrl = $request->query('url');
         

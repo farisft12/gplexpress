@@ -40,31 +40,11 @@ class ShipmentObserver
      */
     public function updated(Shipment $shipment): void
     {
-<<<<<<< HEAD
         // Handle status changes
         if ($shipment->wasChanged('status')) {
             // Note: Status history creation is handled by ShipmentStatusService or other services
             // to allow custom notes. Observer only handles notifications here.
             
-=======
-        // Log status changes (only if not already created by service)
-        if ($shipment->wasChanged('status')) {
-            // Check if status history already exists for this status change
-            $recentHistory = $shipment->statusHistories()
-                ->where('status', $shipment->status)
-                ->where('created_at', '>=', now()->subMinute())
-                ->first();
-            
-            if (!$recentHistory) {
-                ShipmentStatusHistory::create([
-                    'shipment_id' => $shipment->id,
-                    'status' => $shipment->status,
-                    'updated_by' => auth()->id(),
-                    'notes' => 'Status diubah',
-                ]);
-            }
-
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
             // Send notification for "sampai_di_cabang_tujuan" status
             // Only send if status changed TO "sampai_di_cabang_tujuan" (not from it)
             if ($shipment->status === 'sampai_di_cabang_tujuan' && $shipment->getOriginal('status') !== 'sampai_di_cabang_tujuan') {
@@ -181,11 +161,7 @@ class ShipmentObserver
             $message .= "• Cabang Tujuan: {$branchName}\n";
             
             if ($shipment->type === 'cod') {
-<<<<<<< HEAD
                 $codAmount = 'Rp ' . number_format($shipment->total_cod_collectible, 0, ',', '.');
-=======
-                $codAmount = 'Rp ' . number_format($shipment->cod_amount, 0, ',', '.');
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                 $message .= "• Tipe: COD\n";
                 $message .= "• Nilai COD: {$codAmount}\n";
                 $message .= "\n💳 *Pembayaran COD dapat dilakukan di cabang tujuan.*\n";
@@ -206,11 +182,7 @@ class ShipmentObserver
             $message .= "• Telepon Penerima: {$shipment->receiver_phone}\n";
             
             if ($shipment->type === 'cod') {
-<<<<<<< HEAD
                 $codAmount = 'Rp ' . number_format($shipment->total_cod_collectible, 0, ',', '.');
-=======
-                $codAmount = 'Rp ' . number_format($shipment->cod_amount, 0, ',', '.');
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                 $codStatus = $shipment->cod_status === 'lunas' ? 'Lunas' : 'Belum Lunas';
                 $message .= "• Tipe: COD\n";
                 $message .= "• Nilai COD: {$codAmount}\n";

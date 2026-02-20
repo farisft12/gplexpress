@@ -114,13 +114,8 @@
                                                         <span class="px-2 py-1 text-xs font-semibold rounded-full bg-[#F4C430]/10 text-[#F4C430]">
                                                             COD
                                                         </span>
-<<<<<<< HEAD
                                                         @if($shipment->total_cod_collectible > 0)
                                                             <div class="text-xs text-gray-500 mt-1">Rp {{ number_format($shipment->total_cod_collectible, 0, ',', '.') }}</div>
-=======
-                                                        @if($shipment->cod_amount > 0)
-                                                            <div class="text-xs text-gray-500 mt-1">Rp {{ number_format($shipment->cod_amount, 0, ',', '.') }}</div>
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
                                                         @endif
                                                     @else
                                                         <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-700">

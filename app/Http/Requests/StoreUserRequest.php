@@ -31,11 +31,9 @@ class StoreUserRequest extends FormRequest
                 ->mixedCase()
                 ->numbers()
                 ->symbols()],
-<<<<<<< HEAD
+
             'role' => ['required', 'in:owner,admin,manager,kurir,user'],
-=======
-            'role' => ['required', 'in:super_admin,manager_cabang,admin_cabang,courier_cabang,admin,manager,kurir,user'],
->>>>>>> 8415c2504e0943d7af6fcb75f06c3f500ecde573
+
             'status' => ['required', 'in:active,inactive'],
             'branch_id' => ['nullable', 'exists:branches,id'],
         ];
